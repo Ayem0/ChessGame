@@ -1,0 +1,107 @@
+
+#header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#board {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 720px;
+    padding: 30px 0px 10px 00px;
+}
+
+h1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;    
+    color: white;
+    padding: 0;
+    margin-bottom: 10px;
+    margin-top: 0px;
+}
+
+body {
+    background-color: #333;
+    user-select: none;
+}
+
+.container {
+    display: inline;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(99, 99, 99);
+    padding: 10px 10px 35px 10px;
+    border-radius: 12px;
+}
+
+.container-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#info-black, #info-white {
+    display: inline;
+}
+
+.container-row{
+    display: flex;
+    position: absolute;
+}
+.green {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 90px;
+    width: 90px;
+    background-color: rgb(115,149,82);
+}
+
+.beige {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 90px;
+    width: 90px;
+    background-color: rgb(188, 190, 145);
+    /*background-color: rgb(235,236,208);*/
+}
+
+.piece {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+}
+
+.piece-img {
+    height: 80px;
+    width: 80px;
+}
+
+.hud-img {
+    height: 24px;
+    width: 24px;
+}
+
+.accessible {
+    box-shadow: inset 0px 0px 0px 5px lightgray;
+}
+
+span {
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#history {
+    display: inline;
+    height: 848px;
+    width: 300px;
+    background-color: black;
+    border-radius: 10px;
+}
