@@ -241,8 +241,7 @@ function dragStart(event) {
     console.log(possibleMoves);
     let legalMoves = [];
     for (let i = 0; i < possibleMoves.length; i++) {
-        let test = isMoveLegal(pieceStartPosition, possibleMoves[i]);
-        if (test == true) {
+        if (isMoveLegal(pieceStartPosition, possibleMoves[i])) {
             legalMoves.push(possibleMoves[i]);
             const element = document.getElementById(possibleMoves[i]);
             element.classList.add('accessible');
@@ -254,10 +253,10 @@ function dragStart(event) {
 
 function drop(event) {
     let selectedTile = event.target;
-    const posEnd = parseInt(selectedTile.id);
     if (selectedTile.nodeName.toUpperCase() === 'IMG') {
         selectedTile = selectedTile.parentNode.parentNode;
     }
+    const posEnd = parseInt(selectedTile.id);
     console.log(selectedTile.id);
     if (turn == board[movingPiece]['color']) {
         for (let i = 0; i < accessiblePos.length; i++) {
@@ -276,7 +275,7 @@ function drop(event) {
                     }
                     // ajouter if ici pour autre egalité
                 }
-                 console.log(board);
+                // console.log(board);
                 break;
             }
         }
@@ -285,6 +284,8 @@ function drop(event) {
 
 function movePiece(boardType, endPos) {
     // piece qui bouge
+    const endingPos = parseInt(endPos);
+    const startingPos = parseInt(movingPiece);
     const piece = boardType[movingPiece];
     // si roi ou tour bouge, modifie a true
     if (piece['type'] == 'king' && piece['color'] == 'white') {
@@ -296,7 +297,6 @@ function movePiece(boardType, endPos) {
     }
     if (piece['type'] == 'rook-left' && piece['color'] == 'white') {
         wCastleLeft = false;
-
     }
     if (piece['type'] == 'king' && piece['color'] == 'black') {
         bCastleLeft = false;
@@ -309,26 +309,26 @@ function movePiece(boardType, endPos) {
         bCastleLeft = false;
     }
     // si castle, bouge la tour
-    if (piece['type'] == 'king' && endPos == parseInt(movingPiece) + 2) {
-        const rook = boardType[parseInt(movingPiece) + 3];
-        boardType[parseInt(movingPiece) + 3] = '';
-        boardType[parseInt(movingPiece) + 1] = rook;
-        const rookMoving = document.getElementById(parseInt(movingPiece) + 3).firstChild;
-        const rookEnd = document.getElementById(parseInt(movingPiece) + 1);
+    if (piece['type'] == 'king' && endingPos == startingPos + 2) {
+        const rook = boardType[startingPos + 3];
+        boardType[startingPos + 3] = '';
+        boardType[startingPos + 1] = rook;
+        const rookMoving = document.getElementById(startingPos + 3).firstChild;
+        const rookEnd = document.getElementById(startingPos + 1);
         rookEnd.appendChild(rookMoving);
     }
-    if (piece['type'] == 'king' && endPos == parseInt(movingPiece) - 2) {
-        const rook = boardType[parseInt(movingPiece) - 4];
-        boardType[parseInt(movingPiece) - 4] = '';
-        boardType[parseInt(movingPiece) - 1] = rook;
-        const rookMoving = document.getElementById(parseInt(movingPiece) - 4).firstChild;
-        const rookEnd = document.getElementById(parseInt(movingPiece) - 1);
+    if (piece['type'] == 'king' && endingPos == startingPos - 2) {
+        const rook = boardType[startingPos - 4];
+        boardType[startingPos - 4] = '';
+        boardType[startingPos - 1] = rook;
+        const rookMoving = document.getElementById(startingPos - 4).firstChild;
+        const rookEnd = document.getElementById(startingPos - 1);
         rookEnd.appendChild(rookMoving);
     }
     // EN PASSANT
     // si en passant supprime la piece started en passant
     const started = getStartedEP(boardType);
-    if (piece['type'] == 'pawn' && piece['color'] == 'white' && endPos == started - 8) {
+    if (piece['type'] == 'pawn' && piece['color'] == 'white' && endingPos == started - 8) {
         blackDeadPieces.push(boardType[started]); 
         console.log(blackDeadPieces);
         boardType[started] = '';
@@ -338,7 +338,7 @@ function movePiece(boardType, endPos) {
             deadStartedEP.removeChild(deadStartedEP.firstChild);
         }
     }
-    if (piece['type'] == 'pawn' && piece['color'] == 'black' && endPos == started + 8) {
+    if (piece['type'] == 'pawn' && piece['color'] == 'black' && endingPos == started + 8) {
         whiteDeadPieces.push(boardType[started]); 
         console.log(whiteDeadPieces);
         boardType[started] = ''; 
@@ -351,19 +351,19 @@ function movePiece(boardType, endPos) {
     // reset en passant ici
     resetEnPassant(boardType);
     // si en started en passant mets started en passant a true
-    if (boardType[parseInt(movingPiece)]['type'] == 'pawn' && boardType[parseInt(movingPiece)]['color'] == 'black' && endPos == parseInt(movingPiece) + 16) {
-        boardType[parseInt(movingPiece)]['startedEP'] = true;
+    if (boardType[startingPos]['type'] == 'pawn' && boardType[startingPos]['color'] == 'black' && endingPos == startingPos + 16) {
+        boardType[startingPos]['startedEP'] = true;
     }
-    if (boardType[movingPiece]['type'] == 'pawn' && boardType[movingPiece]['color'] == 'white' && endPos == parseInt(movingPiece) - 16) {
-        boardType[parseInt(movingPiece)]['startedEP'] = true;
+    if (boardType[movingPiece]['type'] == 'pawn' && boardType[movingPiece]['color'] == 'white' && endingPos == startingPos - 16) {
+        boardType[startingPos]['startedEP'] = true;
     }
     // ajoute les pieces mortes dans les tableaux
-    if (boardType[endPos] != '') {
-        if (boardType[endPos]['color'] == 'white') {
-            whiteDeadPieces.push(boardType[endPos]);
+    if (boardType[endingPos] != '') {
+        if (boardType[endingPos]['color'] == 'white') {
+            whiteDeadPieces.push(boardType[endingPos]);
             console.log(whiteDeadPieces);
         } else {
-            blackDeadPieces.push(boardType[endPos]);
+            blackDeadPieces.push(boardType[endingPos]);
             console.log(blackDeadPieces);
             // createTurn();
         }
@@ -371,10 +371,10 @@ function movePiece(boardType, endPos) {
     }
     // supprime la piece
     boardType[movingPiece] = '';
-    boardType[endPos] = piece;
+    boardType[endingPos] = piece;
     // modifier le board affiché
-    const pieceMoving = document.getElementById(parseInt(movingPiece)).firstChild;
-    const tileSelected = document.getElementById(endPos);
+    const pieceMoving = document.getElementById(startingPos).firstChild;
+    const tileSelected = document.getElementById(endingPos);
     if (tileSelected.firstChild) {
         // ajouter un update des info black ou white
         tileSelected.removeChild(tileSelected.firstChild);
@@ -405,6 +405,11 @@ function pawnMoves(startId, color, boardType) {
     if (boardType[startPos + 8 * moveDirection] == '') {
         possibleMoves.push(startPos + 8 * moveDirection);
     }
+    // EN PASSANT
+    if (indexStartedEP == startPos - 1 && startPos % 8 > 0 && boardType[indexStartedEP]['color'] == oppositeColor || indexStartedEP == startPos + 1 && startPos % 8 < 7 && boardType[indexStartedEP]['color'] == oppositeColor ) {
+        // ajouter le test ici
+        possibleMoves.push(indexStartedEP + 8 * moveDirection);
+    }
     if ( color == 'white') {
         // 1 case en diagonale droite blanc
         if (startPos % 8 < 7 && startPos / 8 >= 1) {
@@ -413,33 +418,23 @@ function pawnMoves(startId, color, boardType) {
             }
         }
         // 1 case en diagonale gauche blanc
-        if (startPos % 8 > 0 && startPos / 8 < 7) {
+        if (startPos % 8 > 0 && startPos / 8 >= 1) {
             if (boardType[startPos + 9 * moveDirection] != '' && boardType[startPos + 9 * moveDirection]['color'] == oppositeColor) {
                 possibleMoves.push(startPos + 9 * moveDirection);
             }
-        }
-        // EN PASSANT
-        if (indexStartedEP == startPos - 1 && startPos % 8 > 0 && boardType[indexStartedEP]['color'] == oppositeColor || indexStartedEP == startPos + 1 && startPos % 8 < 7 && boardType[indexStartedEP]['color'] == oppositeColor ) {
-            // ajouter le test ici
-            possibleMoves.push(indexStartedEP - 8);
         }
     } else {
         // 1 case en diagonale droite noir
         if (startPos % 8 < 7 && startPos / 8 < 7) {
-            if (boardType[startPos + 7 * moveDirection] != '' && boardType[startPos + 7 * moveDirection]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 7 * moveDirection);
-            }
-        }
-        // 1 case en diagonale gauche noir
-        if (startPos % 8 > 0 && startPos / 8 < 7) {
             if (boardType[startPos + 9 * moveDirection] != '' && boardType[startPos + 9 * moveDirection]['color'] == oppositeColor) {
                 possibleMoves.push(startPos + 9 * moveDirection);
             }
         }
-        // EN PASSANT
-        if (indexStartedEP == startPos - 1 && startPos % 8 > 0 && boardType[indexStartedEP]['color'] == oppositeColor || indexStartedEP == startPos + 1 && startPos % 8 < 7 && boardType[indexStartedEP]['color'] == oppositeColor) {
-            // ajouter le test ici
-            possibleMoves.push(indexStartedEP + 8);
+        // 1 case en diagonale gauche noir
+        if (startPos % 8 > 0 && startPos / 8 < 7) {
+            if (boardType[startPos + 7 * moveDirection] != '' && boardType[startPos + 7 * moveDirection]['color'] == oppositeColor) {
+                possibleMoves.push(startPos + 7 * moveDirection);
+            }
         }
     }
     return possibleMoves;
@@ -822,38 +817,80 @@ function kingMoves(startId, color, boardType) {
 ////////////////////////////////////////////////////////////////////////
 
 function isMoveLegal(startPos, endPos) {
-    // copier le tableau       
-    const boardCopy = [...board];
+    // copier le tableau
+    const startingPos = parseInt(startPos); 
+    const endingPos = parseInt(endPos); 
+    let boardCopy = [...board];
     // recupere le type de piece
-    const piece = boardCopy[startPos];
+    const piece = boardCopy[startingPos];
     const pieceColor = piece['color'];
     // SI CASTLE
-    if ( piece['type'] == 'king' && endPos == startPos + 2) {
-        const rook = boardCopy[startPos + 3];
-        boardCopy[startPos + 3] = '';
-        boardCopy[endPos - 1] = rook;
+    if ( piece['type'] == 'king' && endingPos == startingPos - 2) {
+        if ( isCheck(pieceColor, boardCopy)) {
+            return false;
+        } else {
+            boardCopy[startingPos] = '';
+            boardCopy[parstartingPos - 1] = piece;
+            if ( isCheck(pieceColor, boardCopy)) {
+                return false;
+            } else {
+                boardCopy[startingPos - 1] = '';
+                boardCopy[startingPos - 2] = piece;
+                const rook = boardCopy[startingPos - 4];
+                boardCopy[startingPos - 4] = '';
+                boardCopy[startingPos - 1] = rook;
+                if ( isCheck(pieceColor, boardCopy)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }  
+        }
     }
-    if ( piece['type'] == 'king' && endPos == startPos - 2) {
-        const rook = boardCopy[startPos - 4];
-        boardCopy[startPos - 4] = '';
-        boardCopy[endPos + 1] = rook;
+    if ( piece['type'] == 'king' && endingPos == startingPos + 2) {
+        if ( isCheck(pieceColor, boardCopy)) {
+            console.log('premier check');
+            return false;
+        } else {
+            console.log('premier check');
+            boardCopy[startingPos] = '';
+            boardCopy[startingPos + 1] = piece;
+            if ( isCheck(pieceColor, boardCopy)) {
+                console.log('deuxieme check');
+                return false;
+            } else {
+                boardCopy[startingPos + 1] = '';
+                boardCopy[startingPos + 2] = piece;
+                const rook = boardCopy[startingPos + 3];
+                boardCopy[startingPos + 3] = '';
+                boardCopy[startingPos + 1] = rook;
+                console.log('deuxieme check');
+                if ( isCheck(pieceColor, boardCopy)) {
+                    console.log('troisieme check');
+                    return false;
+                } else {
+                    console.log('troisieme check');
+                    return true;
+                }
+            }  
+        }
     }
     // SI EN PASSANT 
-    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endPos == startPos - 9 && boardCopy[endPos] == '') {
-        boardCopy[endPos + 8] = '';
+    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endingPos == startingPos - 9 && boardCopy[endingPos] == '') {
+        boardCopy[endingPos + 8] = '';
     }
-    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endPos == startPos - 7 && boardCopy[endPos] == '') {
-        boardCopy[endPos + 8] = '';
+    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endingPos == startingPos - 7 && boardCopy[endingPos] == '') {
+        boardCopy[endingPos + 8] = '';
     }
-    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endPos == startPos + 9 && boardCopy[endPos] == '') {
-        boardCopy[endPos - 8] = '';
+    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endingPos == startingPos + 9 && boardCopy[endingPos] == '') {
+        boardCopy[endingPos - 8] = '';
     }
-    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endPos == startPos + 7 && boardCopy[endPos] == '') {
-        boardCopy[endPos - 8] = '';
+    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endingPos == startingPos + 7 && boardCopy[endingPos] == '') {
+        boardCopy[endingPos - 8] = '';
     }
     // fais le déplacement
-    boardCopy[startPos] = '';
-    boardCopy[endPos] = piece;
+    boardCopy[startingPos] = '';
+    boardCopy[endingPos] = piece;
     if (isCheck(pieceColor, boardCopy)) {
         return false;
     } else {
@@ -975,7 +1012,6 @@ function isCheckMate(color, boardType) {
         return false;
     }
 }
-
 /* A FAIRE
 
 - AFFICHAGE DES PIECES MORTES 
