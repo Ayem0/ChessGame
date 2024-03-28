@@ -235,7 +235,6 @@ function drop(event) {
     if (turn == board[movingPiece]['color']) {
         for (let i = 0; i < accessiblePos.length; i++) {
             if (accessiblePos[i] == posEnd) {
-                
                 movePiece(board, posEnd);
                 swapTurn();
                 if (isCheck(turn, board)) {
@@ -428,7 +427,8 @@ function pawnMoves(startId, color, boardType) {
         }
         // EN PASSANT
         const indexStartedEP = getStartedEP(boardType);
-        if (indexStartedEP == startPos - 1 && startPos % 8 > 0 || indexStartedEP == startPos + 1 && startPos % 8 < 7) {
+        if (indexStartedEP == startPos - 1 && startPos % 8 > 0 && boardType[indexStartedEP]['color'] == oppositeColor || indexStartedEP == startPos + 1 && startPos % 8 < 7 && boardType[indexStartedEP]['color'] == oppositeColor ) {
+            // ajouter le test ici
             possibleMoves.push(indexStartedEP - 8);
         }
     } else {
@@ -458,6 +458,7 @@ function pawnMoves(startId, color, boardType) {
         // EN PASSANT
         const indexStartedEP = getStartedEP(boardType);
         if (indexStartedEP == startPos - 1 && startPos % 8 > 0 && boardType[indexStartedEP]['color'] == oppositeColor || indexStartedEP == startPos + 1 && startPos % 8 < 7 && boardType[indexStartedEP]['color'] == oppositeColor) {
+            // ajouter le test ici
             possibleMoves.push(indexStartedEP + 8);
         }
     }
@@ -883,6 +884,30 @@ function isMoveLegal(startPos, endPos) {
     // recupere le type de piece
     const piece = boardCopy[startPos];
     const pieceColor = piece['color'];
+    // SI CASTLE
+    if ( piece['type'] == 'king' && endPos == startPos + 2) {
+        const rook = boardCopy[startPos + 3];
+        boardCopy[startPos + 3] = '';
+        boardCopy[endPos - 1] = rook;
+    }
+    if ( piece['type'] == 'king' && endPos == startPos - 2) {
+        const rook = boardCopy[startPos - 4];
+        boardCopy[startPos - 4] = '';
+        boardCopy[endPos + 1] = rook;
+    }
+    // SI EN PASSANT 
+    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endPos == startPos - 9 && boardCopy[endPos] == '') {
+        boardCopy[endPos + 8] = '';
+    }
+    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endPos == startPos - 7 && boardCopy[endPos] == '') {
+        boardCopy[endPos + 8] = '';
+    }
+    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endPos == startPos + 9 && boardCopy[endPos] == '') {
+        boardCopy[endPos - 8] = '';
+    }
+    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endPos == startPos + 7 && boardCopy[endPos] == '') {
+        boardCopy[endPos - 8] = '';
+    }
     // fais le déplacement
     boardCopy[startPos] = '';
     boardCopy[endPos] = piece;
@@ -1018,7 +1043,6 @@ function isCheckMate(color, boardType) {
 - AFFICHAGE DES PIECES MORTES 
 - HISTORIQUES DES COUPS
 - SAVE LES BOARD COPY POUR HISTORIQUE TU CONNAIS A VOIR
-- EN PASSANT
 - EGALITE
 - TRANSFORMATION DE PION
 
@@ -1030,29 +1054,10 @@ function isCheckMate(color, boardType) {
     - fix roc si case +1 est menacée et si sous echec pas possible
     - maybe mettre startedEP en var
 
+EGALITE :
 
-
-pour echec :
-
-quand le joueur joue vérifier si cela le met en échec 
-si oui annuler le coup
-sinon vérifier si cela met le joueur ennemi en échec 
-si oui vérifier si cela le met en échec et maths, 
-si échec et maths gameOver;
-sinon jouer le coup et mettre le joueur ennemi en échec; 
-sinon jouer le coup;
-
-pour echec et maths :
-
-quand le joueur blanc joue et que cela met les noir en échec
-pour chaque move possibles des noirs vérifier si il est toujours en échec
-si oui échec et maths, gameOver;
-sinon return false;
-
-draw :
-
-- stalemate : si le joueur n'est pas en échec mais n'a aucun coup jouable
-- Perpetual check & three times repetition
-- Theoretical draw (when there are not sufficient pieces on the board to checkmate)
+- There are not enough pieces on the board to force a checkmate (example: a king and a bishop vs. a king)
+- A player declares a draw if the same exact position is repeated three times (though not necessarily three times in a row)
+- Fifty consecutive moves have been played where neither player has moved a pawn or captured a piece
 
 */
