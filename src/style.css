@@ -10,8 +10,8 @@
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    max-width: 720px;
-    padding: 30px 0px 10px 00px;
+    max-width: 770px;
+    padding: 30px 0px 6px 0px;
 }
 
 h1 {
@@ -34,7 +34,7 @@ body {
     align-items: center;
     justify-content: center;
     background-color: rgb(99, 99, 99);
-    padding: 10px 10px 35px 10px;
+    padding: 6px 0px 30px 0px;
     border-radius: 12px;
 }
 
@@ -43,14 +43,19 @@ body {
     align-items: center;
     justify-content: center;
 }
-
+.count {
+    color: white;
+}
 #info-black, #info-white {
     display: inline;
 }
 
 .container-row{
     display: flex;
+    align-items: center;
+    justify-content: center;
     position: absolute;
+    padding-left: 10px;
 }
 .green {
     display: flex;
@@ -59,6 +64,7 @@ body {
     height: 90px;
     width: 90px;
     background-color: rgb(115,149,82);
+    position: relative;
 }
 
 .beige {
@@ -68,7 +74,40 @@ body {
     height: 90px;
     width: 90px;
     background-color: rgb(188, 190, 145);
-    /*background-color: rgb(235,236,208);*/
+    position: relative;
+}
+
+.vertical {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 90px;
+    width: 25px;
+    background-color: gray;
+    position: relative;
+    color: white;
+    font-size: 20px;
+}
+.vertical-horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    width: 25px;
+    background-color: gray;
+    position: relative;
+}
+
+.horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    width: 90px;
+    background-color: gray;
+    position: relative;
+    color: white;
+    font-size: 20px;
 }
 
 .piece {
@@ -83,6 +122,13 @@ body {
     width: 80px;
 }
 
+.icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
 .hud-img {
     height: 24px;
     width: 24px;
@@ -92,10 +138,11 @@ body {
     box-shadow: inset 0px 0px 0px 5px lightgray;
 }
 
-span {
+.player-name {
     color: white;
     font-weight: bold;
     font-size: 18px;
+    padding-left: 10px;
 }
 
 #history {

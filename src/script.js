@@ -17,7 +17,7 @@ const nValue = 3;
 const bValue = 3;
 const rValue = 5;
 const qValue = 9;
-const kValue = 1000;
+const kValue = 10000;
 // les img des pieces
 const wPImg = 'img/pawn_white.png';
 const wRImg = 'img/rook_white.png';
@@ -33,25 +33,25 @@ const bBImg = 'img/bishop_black.png';
 const bNImg = 'img/knight_black.png';
 // Les pieces
 // blanches
-var wP = { 'type': p, 'color': white, 'value': pValue, 'img': wPImg, 'startedEP': false };
-var wN = { 'type': n, 'color': white, 'value': nValue, 'img': wNImg };
-var wR = { 'type': r, 'color': white, 'value': rValue, 'img': wRImg };
-var wRLeft = { 'type': r + left, 'color': white, 'value': rValue, 'img': wRImg };
-var wRRight = { 'type': r + right, 'color': white, 'value': rValue, 'img': wRImg };
-var wB = { 'type': b, 'color': white, 'value': bValue, 'img': wBImg };
-var wQ = { 'type': q, 'color': white, 'value': qValue, 'img': wQImg };
-var wK = { 'type': k, 'color': white, 'value': kValue, 'img': wKImg };
+const wP = { 'type': p, 'color': white, 'value': pValue, 'img': wPImg, 'startedEP': false };
+const wN = { 'type': n, 'color': white, 'value': nValue, 'img': wNImg };
+const wR = { 'type': r, 'color': white, 'value': rValue, 'img': wRImg };
+const wRLeft = { 'type': r + left, 'color': white, 'value': rValue, 'img': wRImg };
+const wRRight = { 'type': r + right, 'color': white, 'value': rValue, 'img': wRImg };
+const wB = { 'type': b, 'color': white, 'value': bValue, 'img': wBImg };
+const wQ = { 'type': q, 'color': white, 'value': qValue, 'img': wQImg };
+const wK = { 'type': k, 'color': white, 'value': kValue, 'img': wKImg };
 // noires
-var bP = { 'type': p, 'color': black, 'value': pValue, 'img': bPImg, 'startedEP': false };
-var bN = { 'type': n, 'color': black, 'value': nValue, 'img': bNImg };
-var bR = { 'type': r, 'color': black, 'value': rValue, 'img': bRImg };
-var bRLeft = { 'type': r + left, 'color': black, 'value': rValue, 'img': bRImg };
-var bRRight = { 'type': r + right, 'color': black, 'value': rValue, 'img': bRImg };
-var bB = { 'type': b, 'color': black, 'value': bValue, 'img': bBImg };
-var bQ = { 'type': q, 'color': black, 'value': qValue, 'img': bQImg };
-var bK = { 'type': k, 'color': black, 'value': kValue, 'img': bKImg };
+const bP = { 'type': p, 'color': black, 'value': pValue, 'img': bPImg, 'startedEP': false };
+const bN = { 'type': n, 'color': black, 'value': nValue, 'img': bNImg };
+const bR = { 'type': r, 'color': black, 'value': rValue, 'img': bRImg };
+const bRLeft = { 'type': r + left, 'color': black, 'value': rValue, 'img': bRImg };
+const bRRight = { 'type': r + right, 'color': black, 'value': rValue, 'img': bRImg };
+const bB = { 'type': b, 'color': black, 'value': bValue, 'img': bBImg };
+const bQ = { 'type': q, 'color': black, 'value': qValue, 'img': bQImg };
+const bK = { 'type': k, 'color': black, 'value': kValue, 'img': bKImg };
 // le board
-var board = [
+const defaultBoard = [
     { ...bRLeft }, { ...bN }, { ...bB }, { ...bQ }, { ...bK }, { ...bB }, { ...bN }, { ...bRRight },
     { ...bP }, { ...bP }, { ...bP }, { ...bP }, { ...bP }, { ...bP }, { ...bP }, { ...bP },
     '', '', '', '', '', '', '', '',
@@ -61,9 +61,10 @@ var board = [
     { ...wP }, { ...wP }, { ...wP }, { ...wP }, { ...wP }, { ...wP }, { ...wP }, { ...wP },
     { ...wRLeft }, { ...wN }, { ...wB }, { ...wQ }, { ...wK }, { ...wB }, { ...wN }, { ...wRRight },
 ];
+var board = [...defaultBoard];
 /*
 // test echec et maths
-var board = [
+var defaultBoard = [
     { ...bRLeft }, '', '', '', '', { ...bRRight }, { ...bK }, '',
     { ...bP }, { ...bP }, { ...bP }, '', '', { ...bP }, '', { ...bP },
     '', '', '', '', '', { ...wB }, { ...bP }, '',
@@ -74,7 +75,7 @@ var board = [
     '', '', '', '', '', { ...wRRight }, { ...wK }, '',
 ];
 // test draw
-var board = [
+var defaultBoard = [
     { ...bK}, '', '', '', '', '', '', '',
     '', '', '', '', '', '', '', '',
     '', '', '', '', '', '', '', '',
@@ -88,77 +89,70 @@ var board = [
 // le tour actuel
 var turn = 'white';
 // Les pieces mortes
-var whiteDeadPieces = [];
-var blackDeadPieces = [];
+const whiteDeadPieces = [];
+const blackDeadPieces = [];
 // si game fini
-var gameOver = false;
+let gameOver = false;
 // historique des coups joués
-var history = [];
-var boardHistory = [];
+const history = [];
+const boardHistory = [];
 // var pour castle
-var wCastleRight = true;
-var wCastleLeft = true;
-var bCastleRight = true;
-var bCastleLeft = true;
-// var pour accessible pos // sinon bug // pour affichage
-var accessiblePos = [];
-var movingPiece;
+let wCastleRight = true;
+let wCastleLeft = true;
+let bCastleRight = true;
+let bCastleLeft = true;
+// var pour 50 moves rules
+let countTo50 = 0;
+// var pour enlever les cases en surbrillance 
+let accessiblePos = [];
 
 createBoard(board);
-addPiecesToBoard(board);
 
 function createBoard(boardType) {
     const boardDiv = document.getElementById('board');
+    const aToH = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     let n = 0;
-    for (let i = 0; i < boardType.length; i++) {
-        const div = document.createElement('div');
-        div.setAttribute('id', i);
-        div.addEventListener('drop', drop);
-        div.addEventListener('dragover', dragOver);
-        if (i % 8 == 0 && i != 0) {
-            n++;
-        }
-        if (n % 2 == 0) {
-            if (i % 2 == 0) {
-                div.classList.add('beige');
-            } else {
-                div.classList.add('green');
-            }
-        } else {
-            if (i % 2 == 0) {
-                div.classList.add('green');
-            } else {
-                div.classList.add('beige');
-            }
-        }
-        boardDiv.appendChild(div);
-    }
-}
-
-function addPiecesToBoard(boardType) {
-    for (let i = 0; i < boardType.length; i++) {
-        if (boardType[i] != '') {
-            const boardDiv = document.getElementById(i);
+    for (let i = 8; i > -2; i--) { 
+        for (let j = 0; j < 10; j++) {
             const div = document.createElement('div');
-            div.setAttribute('draggable', true);
-            div.addEventListener('dragstart', dragStart);
-            div.addEventListener('dragend', dragEnd);
-            div.addEventListener('dragover', dragOver);
-            const img = document.createElement('img');
-            img.src = boardType[i]['img'];
-            img.classList.add('piece-img')
-            div.classList.add(boardType[i]['type'], boardType[i]['color'], 'piece');
-            div.appendChild(img);
+            if (i == -1 || i == 8) {
+                if ( j != 0 && j != 9) {
+                div.textContent = aToH[j-1];
+                div.classList.add('horizontal');
+                } else {
+                    div.classList.add('vertical-horizontal');
+                }
+            } else {
+                if (j == 0 || j == 9) {
+                    div.textContent = i+1;
+                    div.classList.add('vertical');
+                } else {
+                    div.setAttribute('id', n);
+                    div.addEventListener('drop', drop);
+                    div.addEventListener('dragover', dragOver);
+                    if (boardType[n] != '') {
+                        const divPiece = document.createElement('div');
+                        const img = document.createElement('img');
+                        divPiece.setAttribute('draggable', true);
+                        divPiece.addEventListener('dragstart', dragStart);
+                        divPiece.addEventListener('dragend', dragEnd);
+                        divPiece.addEventListener('dragover', dragOver);
+                        divPiece.classList.add(boardType[n]['type'], boardType[n]['color'], 'piece');
+                        img.src = boardType[n]['img'];
+                        img.classList.add('piece-img');
+                        divPiece.appendChild(img);
+                        div.appendChild(divPiece);
+                    }
+                    if ((j + i) % 2 == 0) {
+                        div.classList.add('beige');
+                    } else {
+                        div.classList.add('green');
+                    }
+                    n++;
+                }
+            }
             boardDiv.appendChild(div);
         }
-    }
-}
-
-function swapTurn() {
-    if (turn == "white") {
-        turn = "black";
-    } else {
-        turn = "white";
     }
 }
 
@@ -173,13 +167,8 @@ function getStartedEP(boardType) {
 
 function resetEnPassant(boardType) {
     for (let i = 0; i < boardType.length; i++) {
-        if (boardType[i]['type'] == 'pawn') {
-            if (boardType[i]['startedEP'] == true) {
-                boardType[i]['startedEP'] = false;
-                return;
-            } else {
-                boardType[i]['startedEP'] = false;
-            }
+        if ( boardType[i]['type'] == 'pawn'){
+            boardType[i]['startedEP'] = false;
         }
     }
 }
@@ -189,6 +178,59 @@ function getOppositeColor(color) {
         return 'black';
     } else {
         return 'white';
+    }
+}
+
+function updateBoardInfo(whiteGrave, blackGrave) {
+    let whiteCount = 0;
+    let blackCount = 0;
+    const elements = [
+        'black-pawn-icon', 'black-bishop-icon', 'black-queen-icon', 'black-rook-icon', 'black-knight-icon',
+        'white-pawn-icon', 'white-bishop-icon', 'white-queen-icon', 'white-rook-icon', 'white-knight-icon'
+    ];
+    for ( let i = 0; i < elements.length; i++) {
+        const div = document.getElementById(elements[i]);
+        div.textContent = '';
+    }
+    for ( let i = 0; i < whiteGrave.length; i++) {
+        const img = document.createElement('img');
+        let type = whiteGrave[i]['type'];
+        (type.includes('pawn')) ? type = 'pawn' : null;
+        (type.includes('knight')) ? type = 'knight' : null;
+        (type.includes('bishop')) ? type = 'bishop' : null;
+        (type.includes('rook')) ? type = 'rook' : null;
+        (type.includes('queen')) ? type = 'queen' : null;
+        // meme chose avec transforme type pawn si besoin
+        img.src = whiteGrave[i]['img'];
+        img.classList.add('hud-img');
+        const div = document.getElementById('white-' + type + '-icon')
+        div.appendChild(img);
+        blackCount+= whiteGrave[i]['value'];
+    }
+    for ( let i = 0; i < blackGrave.length; i++) {
+        const img = document.createElement('img');
+        let type = blackGrave[i]['type'];
+        (type.includes('pawn')) ? type = 'pawn' : null;
+        (type.includes('knight')) ? type = 'knight' : null;
+        (type.includes('bishop')) ? type = 'bishop' : null;
+        (type.includes('rook')) ? type = 'rook' : null;
+        (type.includes('queen')) ? type = 'queen' : null;
+        img.src = blackGrave[i]['img'];
+        img.classList.add('hud-img');
+        const div = document.getElementById('black-' + type + '-icon')
+        div.appendChild(img);
+        whiteCount+= blackGrave[i]['value'];
+    }
+    const blackPlus = document.getElementById('black-plus').querySelector('span');
+    blackPlus.textContent = '';
+    const whitePlus = document.getElementById('white-plus').querySelector('span');
+    whitePlus.textContent = '';
+    if ( whiteCount - blackCount != 0) {
+        if ( whiteCount > blackCount) {
+            whitePlus.textContent = '+ ' + (whiteCount - blackCount);
+        } else {
+            blackPlus.textContent = '+ ' + (blackCount - whiteCount);
+        }
     }
 }
 
@@ -208,108 +250,118 @@ function dragEnd(event) {
         let element = document.getElementById(accessiblePos[i]);
         element.classList.remove('accessible');
     }
-    accessiblePos = [];
-    movingPiece = '';
 }
 
 function dragStart(event) {
-    const pieceStartPosition = event.srcElement.parentNode.parentNode.id;
-    const pieceType = event.srcElement.parentNode.classList[0];
-    const pieceColor = event.srcElement.parentNode.classList[1];
-    movingPiece = pieceStartPosition;
-    let possibleMoves = [];
-    console.log(pieceStartPosition);
-    if (pieceType == 'pawn') {
-        possibleMoves = possibleMoves.concat(pawnMoves(pieceStartPosition, pieceColor, board));
-    }
-    if (pieceType == 'knight') {
-        possibleMoves = possibleMoves.concat(knightMoves(pieceStartPosition, pieceColor, board));
-    }
-    if (pieceType == 'bishop') {
-        possibleMoves = possibleMoves.concat(bishopMoves(pieceStartPosition, pieceColor, board));
-    }
-    if (pieceType.includes('rook')) {
-        possibleMoves = possibleMoves.concat(rookMoves(pieceStartPosition, pieceColor, board));
-    }
-    if (pieceType == 'queen') {
-        possibleMoves = possibleMoves.concat(bishopMoves(pieceStartPosition, pieceColor, board));
-        possibleMoves = possibleMoves.concat(rookMoves(pieceStartPosition, pieceColor, board));
-    }
-    if (pieceType == 'king') {
-        possibleMoves = possibleMoves.concat(kingMoves(pieceStartPosition, pieceColor, board));
-    }
-    console.log(possibleMoves);
-    let legalMoves = [];
-    for (let i = 0; i < possibleMoves.length; i++) {
-        if (isMoveLegal(pieceStartPosition, possibleMoves[i])) {
-            legalMoves.push(possibleMoves[i]);
-            const element = document.getElementById(possibleMoves[i]);
-            element.classList.add('accessible');
+    if (!gameOver) {
+        const pieceStartPosition = event.srcElement.parentNode.parentNode.id;
+        const pieceType = event.srcElement.parentNode.classList[0];
+        const pieceColor = event.srcElement.parentNode.classList[1];
+        let possibleMoves = [];
+        let legalMoves = [];
+        if (pieceType.includes('pawn')) {
+            possibleMoves = possibleMoves.concat(pawnMoves(pieceStartPosition, pieceColor, board));
         }
+        if (pieceType.includes('knight')) {
+            possibleMoves = possibleMoves.concat(knightMoves(pieceStartPosition, pieceColor, board));
+        }
+        if (pieceType.includes('bishop')) {
+            possibleMoves = possibleMoves.concat(bishopMoves(pieceStartPosition, pieceColor, board));
+        }
+        if (pieceType.includes('rook')) {
+            possibleMoves = possibleMoves.concat(rookMoves(pieceStartPosition, pieceColor, board));
+        }
+        if (pieceType.includes('queen')) {
+            possibleMoves = possibleMoves.concat(bishopMoves(pieceStartPosition, pieceColor, board), rookMoves(pieceStartPosition, pieceColor, board) );
+        }
+        if (pieceType.includes('king')) {
+            possibleMoves = possibleMoves.concat(kingMoves(pieceStartPosition, pieceColor, board));
+        }
+        for (let i = 0; i < possibleMoves.length; i++) {
+            if (isMoveLegal(pieceStartPosition, possibleMoves[i], board)) {
+                legalMoves.push(possibleMoves[i]);
+                const element = document.getElementById(possibleMoves[i]);
+                element.classList.add('accessible');
+            }
+        }
+        accessiblePos = legalMoves;
+        event.dataTransfer.setData("legalMoves", JSON.stringify(legalMoves));
+        event.dataTransfer.setData("startPosition", pieceStartPosition);
     }
-    accessiblePos = legalMoves;
-    console.log(legalMoves);
 }
 
 function drop(event) {
-    let selectedTile = event.target;
-    if (selectedTile.nodeName.toUpperCase() === 'IMG') {
-        selectedTile = selectedTile.parentNode.parentNode;
-    }
-    const posEnd = parseInt(selectedTile.id);
-    console.log(selectedTile.id);
-    if (turn == board[movingPiece]['color']) {
-        for (let i = 0; i < accessiblePos.length; i++) {
-            if (accessiblePos[i] == posEnd) {
-                movePiece(board, posEnd);
-                swapTurn();
-                if (isCheck(turn, board)) {
-                    if (isCheckMate(turn, board)) {
-                        console.log('echec et maths');
+    event.stopPropagation();
+    if (!gameOver) {
+        let selectedTile = event.target;
+        if (selectedTile.nodeName.toUpperCase() === 'IMG') {
+            selectedTile = selectedTile.parentNode.parentNode;
+        }
+        if (selectedTile.nodeName.toUpperCase() === 'P') {
+            selectedTile = selectedTile.parentNode;
+        }
+        const startPosition = event.dataTransfer.getData("startPosition");
+        const retrievedArray = event.dataTransfer.getData("legalMoves");
+        const legalMoves = JSON.parse(retrievedArray);
+        const posEnd = parseInt(selectedTile.id);
+        const color = board[startPosition]['color'];
+        const oppositeColor = getOppositeColor(color);
+        if (turn == color && !gameOver) {
+            for (let i = 0; i < legalMoves.length; i++) {
+                if (legalMoves[i] == posEnd) {
+                    movePiece(board, posEnd, startPosition);
+                    updateBoardInfo(whiteDeadPieces, blackDeadPieces);
+                    if (isCheck(oppositeColor, board)) {
+                        if (isCheckMate(oppositeColor, board)) {
+                            gameOver = true;
+                            console.log('echec et maths');
+                        } else {
+                            if ( countTo50 == 50) {
+                                gameOver = true;
+                                console.log('50 moves rule')
+                            } else {
+                                console.log('echec');
+                            }
+                        }
                     } else {
-                        console.log('echec');
+                        if (isCheckMate(oppositeColor, board)) {
+                            console.log('stalemate');
+                            gameOver = true;
+                        }
+                        if ( countTo50 == 50) {
+                            gameOver = true;
+                            console.log('50 moves rule')
+                        }
+                        // ajouter if ici pour autre egalité
                     }
-                } else {
-                    if (isCheckMate(turn, board)) {
-                        console.log('DRAW');
-                    }
-                    // ajouter if ici pour autre egalité
+                    turn = getOppositeColor(turn);
+                    break;
                 }
-                // console.log(board);
-                break;
             }
         }
     }
 }
 
-function movePiece(boardType, endPos) {
+function movePiece(boardType, endPos, startPos) {
     // piece qui bouge
     const endingPos = parseInt(endPos);
-    const startingPos = parseInt(movingPiece);
-    const piece = boardType[movingPiece];
+    const startingPos = parseInt(startPos);
+    const piece = boardType[startingPos];
+    // 50 move rule
+    if ( piece['type'].includes('pawn') && boardType[endingPos] != '') {
+        countTo50 = 0;
+    } else {
+        countTo50++;
+    }
     // si roi ou tour bouge, modifie a true
-    if (piece['type'] == 'king' && piece['color'] == 'white') {
-        wCastleLeft = false;
-        wCastleRight = false;
-    }
-    if (piece['type'] == 'rook-right' && piece['color'] == 'white') {
-        wCastleRight = false;
-    }
-    if (piece['type'] == 'rook-left' && piece['color'] == 'white') {
-        wCastleLeft = false;
-    }
-    if (piece['type'] == 'king' && piece['color'] == 'black') {
-        bCastleLeft = false;
-        bCastleRight = false;
-    }
-    if (piece['type'] == 'rook-right' && piece['color'] == 'black') {
-        bCastleRight = false;
-    }
-    if (piece['type'] == 'rook-left' && piece['color'] == 'black') {
-        bCastleLeft = false;
-    }
+    (piece['type'].includes('king') && piece['color'] === 'white') ? (wCastleLeft = false, wCastleRight = false) : null;
+    (piece['type'] === 'rook-right' && piece['color'] === 'white') ? (wCastleRight = false) : null;
+    (piece['type'] === 'rook-left' && piece['color'] === 'white') ? (wCastleLeft = false) : null;
+    (piece['type'].includes('king') && piece['color'] === 'black') ? (bCastleLeft = false, bCastleRight = false) : null;
+    (piece['type'] === 'rook-right' && piece['color'] === 'black') ? (bCastleRight = false) : null;
+    (piece['type'] === 'rook-left' && piece['color'] === 'black') ? (bCastleLeft = false) : null;
     // si castle, bouge la tour
-    if (piece['type'] == 'king' && endingPos == startingPos + 2) {
+    if (piece['type'].includes('king') && endingPos == startingPos + 2) {
         const rook = boardType[startingPos + 3];
         boardType[startingPos + 3] = '';
         boardType[startingPos + 1] = rook;
@@ -317,7 +369,7 @@ function movePiece(boardType, endPos) {
         const rookEnd = document.getElementById(startingPos + 1);
         rookEnd.appendChild(rookMoving);
     }
-    if (piece['type'] == 'king' && endingPos == startingPos - 2) {
+    if (piece['type'].includes('king') && endingPos == startingPos - 2) {
         const rook = boardType[startingPos - 4];
         boardType[startingPos - 4] = '';
         boardType[startingPos - 1] = rook;
@@ -325,10 +377,44 @@ function movePiece(boardType, endPos) {
         const rookEnd = document.getElementById(startingPos - 1);
         rookEnd.appendChild(rookMoving);
     }
+    // ajoute les pieces mortes dans les tableaux
+    if (boardType[endingPos] != '') {
+        if (boardType[endingPos]['color'] == 'white') {
+            whiteDeadPieces.push(boardType[endingPos]);
+        } else {
+            blackDeadPieces.push(boardType[endingPos]);
+        }
+    } 
+    // supprime la piece
+    boardType[startingPos] = '';
+    boardType[endingPos] = piece;
+    console.log(boardType);
+    // modifier le board affiché
+    const pieceMoving = document.getElementById(startingPos);
+    const tileSelected = document.getElementById(endingPos);
+    // A MODIFIER ICI
+    if ( tileSelected.firstChild) {
+        tileSelected.removeChild(tileSelected.firstChild);
+    }
+    tileSelected.appendChild(pieceMoving.firstChild);
+
+    // PROMOTION DE PION // A MODIFIER AVEC UN POPUP ET TRANSFORMER EN FONCTION DU POP UP // en attendant la selection empecher les mouvements 
+    if ( piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos >= 0 && endingPos < 8) {
+        boardType[endingPos] = {...wQ};
+        tileSelected.firstChild.className = "";
+        tileSelected.firstChild.classList.add('transformed-queen', 'white', 'piece');
+        tileSelected.firstChild.firstChild.src = wQImg;
+    }
+    if ( piece['type'].includes('pawn') && piece['color'] == 'black' && endingPos <= 63 && endingPos > 55) {
+        boardType[endingPos] = {...bQ};
+        tileSelected.firstChild.className = "";
+        tileSelected.firstChild.classList.add('transformed-queen', 'black', 'piece');
+        tileSelected.firstChild.firstChild.src = bQImg;
+    }
     // EN PASSANT
     // si en passant supprime la piece started en passant
     const started = getStartedEP(boardType);
-    if (piece['type'] == 'pawn' && piece['color'] == 'white' && endingPos == started - 8) {
+    if (piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == started - 8) {
         blackDeadPieces.push(boardType[started]); 
         console.log(blackDeadPieces);
         boardType[started] = '';
@@ -338,7 +424,7 @@ function movePiece(boardType, endPos) {
             deadStartedEP.removeChild(deadStartedEP.firstChild);
         }
     }
-    if (piece['type'] == 'pawn' && piece['color'] == 'black' && endingPos == started + 8) {
+    if (piece['type'].includes('pawn') && piece['color'] == 'black' && endingPos == started + 8) {
         whiteDeadPieces.push(boardType[started]); 
         console.log(whiteDeadPieces);
         boardType[started] = ''; 
@@ -351,35 +437,12 @@ function movePiece(boardType, endPos) {
     // reset en passant ici
     resetEnPassant(boardType);
     // si en started en passant mets started en passant a true
-    if (boardType[startingPos]['type'] == 'pawn' && boardType[startingPos]['color'] == 'black' && endingPos == startingPos + 16) {
-        boardType[startingPos]['startedEP'] = true;
+    if (piece['type'].includes('pawn') && piece['color'] == 'black' && endingPos == startingPos + 16) {
+        boardType[endingPos]['startedEP'] = true;
     }
-    if (boardType[movingPiece]['type'] == 'pawn' && boardType[movingPiece]['color'] == 'white' && endingPos == startingPos - 16) {
-        boardType[startingPos]['startedEP'] = true;
+    if (piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == startingPos - 16) {
+        boardType[endingPos]['startedEP'] = true;
     }
-    // ajoute les pieces mortes dans les tableaux
-    if (boardType[endingPos] != '') {
-        if (boardType[endingPos]['color'] == 'white') {
-            whiteDeadPieces.push(boardType[endingPos]);
-            console.log(whiteDeadPieces);
-        } else {
-            blackDeadPieces.push(boardType[endingPos]);
-            console.log(blackDeadPieces);
-            // createTurn();
-        }
-        // updateBoardTypeInfo();
-    }
-    // supprime la piece
-    boardType[movingPiece] = '';
-    boardType[endingPos] = piece;
-    // modifier le board affiché
-    const pieceMoving = document.getElementById(startingPos).firstChild;
-    const tileSelected = document.getElementById(endingPos);
-    if (tileSelected.firstChild) {
-        // ajouter un update des info black ou white
-        tileSelected.removeChild(tileSelected.firstChild);
-    }
-    tileSelected.appendChild(pieceMoving);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -407,7 +470,6 @@ function pawnMoves(startId, color, boardType) {
     }
     // EN PASSANT
     if (indexStartedEP == startPos - 1 && startPos % 8 > 0 && boardType[indexStartedEP]['color'] == oppositeColor || indexStartedEP == startPos + 1 && startPos % 8 < 7 && boardType[indexStartedEP]['color'] == oppositeColor ) {
-        // ajouter le test ici
         possibleMoves.push(indexStartedEP + 8 * moveDirection);
     }
     if ( color == 'white') {
@@ -816,16 +878,16 @@ function kingMoves(startId, color, boardType) {
 //////////////                                          ////////////////
 ////////////////////////////////////////////////////////////////////////
 
-function isMoveLegal(startPos, endPos) {
+function isMoveLegal(startPos, endPos, boardType) {
     // copier le tableau
     const startingPos = parseInt(startPos); 
     const endingPos = parseInt(endPos); 
-    let boardCopy = [...board];
+    const boardCopy = [...boardType];
     // recupere le type de piece
     const piece = boardCopy[startingPos];
     const pieceColor = piece['color'];
     // SI CASTLE
-    if ( piece['type'] == 'king' && endingPos == startingPos - 2) {
+    if ( piece['type'].includes('king') && endingPos == startingPos - 2) {
         if ( isCheck(pieceColor, boardCopy)) {
             return false;
         } else {
@@ -847,16 +909,13 @@ function isMoveLegal(startPos, endPos) {
             }  
         }
     }
-    if ( piece['type'] == 'king' && endingPos == startingPos + 2) {
+    if ( piece['type'].includes('king') && endingPos == startingPos + 2) {
         if ( isCheck(pieceColor, boardCopy)) {
-            console.log('premier check');
             return false;
         } else {
-            console.log('premier check');
             boardCopy[startingPos] = '';
             boardCopy[startingPos + 1] = piece;
             if ( isCheck(pieceColor, boardCopy)) {
-                console.log('deuxieme check');
                 return false;
             } else {
                 boardCopy[startingPos + 1] = '';
@@ -864,28 +923,25 @@ function isMoveLegal(startPos, endPos) {
                 const rook = boardCopy[startingPos + 3];
                 boardCopy[startingPos + 3] = '';
                 boardCopy[startingPos + 1] = rook;
-                console.log('deuxieme check');
                 if ( isCheck(pieceColor, boardCopy)) {
-                    console.log('troisieme check');
                     return false;
                 } else {
-                    console.log('troisieme check');
                     return true;
                 }
             }  
         }
     }
     // SI EN PASSANT 
-    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endingPos == startingPos - 9 && boardCopy[endingPos] == '') {
+    if ( piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == startingPos - 9 && boardCopy[endingPos] == '') {
         boardCopy[endingPos + 8] = '';
     }
-    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endingPos == startingPos - 7 && boardCopy[endingPos] == '') {
+    if ( piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == startingPos - 7 && boardCopy[endingPos] == '') {
         boardCopy[endingPos + 8] = '';
     }
-    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endingPos == startingPos + 9 && boardCopy[endingPos] == '') {
+    if ( piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == startingPos + 9 && boardCopy[endingPos] == '') {
         boardCopy[endingPos - 8] = '';
     }
-    if ( piece['type'] == 'pawn' && piece['color'] == 'white' && endingPos == startingPos + 7 && boardCopy[endingPos] == '') {
+    if ( piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == startingPos + 7 && boardCopy[endingPos] == '') {
         boardCopy[endingPos - 8] = '';
     }
     // fais le déplacement
@@ -912,28 +968,28 @@ function isCheck(color, boardType) {
     for (let i = 0; i < boardType.length; i++) {
         if (boardType[i] != '') {
             if (boardType[i]['color'] == oppositeColor) {
-                if (boardType[i]['type'] == 'pawn') {
+                if (boardType[i]['type'].includes('pawn')) {
                     ennemyAccessiblePos = ennemyAccessiblePos.concat(pawnMoves(i, oppositeColor, boardType));
                 }
-                if (boardType[i]['type'] == 'bishop') {
+                if (boardType[i]['type'].includes('bishop')) {
                     ennemyAccessiblePos = ennemyAccessiblePos.concat(bishopMoves(i, oppositeColor, boardType));
                 }
                 if (boardType[i]['type'].includes('rook')) {
                     ennemyAccessiblePos = ennemyAccessiblePos.concat(rookMoves(i, oppositeColor, boardType));
                 }
-                if (boardType[i]['type'] == 'knight') {
+                if (boardType[i]['type'].includes('knight')) {
                     ennemyAccessiblePos = ennemyAccessiblePos.concat(knightMoves(i, oppositeColor, boardType));
                 }
-                if (boardType[i]['type'] == 'queen') {
+                if (boardType[i]['type'].includes('queen')) {
                     ennemyAccessiblePos = ennemyAccessiblePos.concat(rookMoves(i, oppositeColor, boardType));
                     ennemyAccessiblePos = ennemyAccessiblePos.concat(bishopMoves(i, oppositeColor, boardType));
                 }
-                if (boardType[i]['type'] == 'king') {
+                if (boardType[i]['type'].includes('king')) {
                     ennemyAccessiblePos = ennemyAccessiblePos.concat(kingMoves(i, oppositeColor, boardType));
                 }
             }
             if (boardType[i]['color'] == color) {
-                if (boardType[i]['type'] == 'king') {
+                if (boardType[i]['type'].includes('king')) {
                     kingPos = i;
                 }
             }
@@ -952,52 +1008,50 @@ function isCheckMate(color, boardType) {
     for (let i = 0; i < boardType.length; i++) {
         if (boardType[i] != '') {
             if (boardType[i]['color'] == color) {
-                if (boardType[i]['type'] == 'pawn') {
-                    let pawnPossibleMoves = pawnMoves(i, color, boardType);
+                if (boardType[i]['type'].includes('pawn')) {
+                    const pawnPossibleMoves = pawnMoves(i, color, boardType);
                     for (let j = 0; j < pawnPossibleMoves.length; j++) {
-                        if (isMoveLegal(i, pawnPossibleMoves[j])) {
+                        if (isMoveLegal(i, pawnPossibleMoves[j], boardType)) {
                             colorAccessiblePos.push(pawnPossibleMoves[j]);
                         }
                     }
                 }
-                if (boardType[i]['type'] == 'bishop') {
-                    let bishopPossibleMoves = bishopMoves(i, color, boardType);
+                if (boardType[i]['type'].includes('bishop')) {
+                    const bishopPossibleMoves = bishopMoves(i, color, boardType);
                     for (let j = 0; j < bishopPossibleMoves.length; j++) {
-                        if (isMoveLegal(i, bishopPossibleMoves[j])) {
+                        if (isMoveLegal(i, bishopPossibleMoves[j], boardType)) {
                             colorAccessiblePos.push(bishopPossibleMoves[j]);
                         }
                     }
                 }
                 if (boardType[i]['type'].includes('rook')) {
-                    let rookPossibleMoves = rookMoves(i, color, boardType);
+                    const rookPossibleMoves = rookMoves(i, color, boardType);
                     for (let j = 0; j < rookPossibleMoves.length; j++) {
-                        if (isMoveLegal(i, rookPossibleMoves[j])) {
+                        if (isMoveLegal(i, rookPossibleMoves[j], boardType)) {
                             colorAccessiblePos.push(rookPossibleMoves[j]);
                         }
                     }
                 }
-                if (boardType[i]['type'] == 'knight') {
-                    let knightPossibleMoves = knightMoves(i, color, boardType);
+                if (boardType[i]['type'].includes('knight')) {
+                    const knightPossibleMoves = knightMoves(i, color, boardType);
                     for (let j = 0; j < knightPossibleMoves.length; j++) {
-                        if (isMoveLegal(i, knightPossibleMoves[j])) {
+                        if (isMoveLegal(i, knightPossibleMoves[j], boardType)) {
                             colorAccessiblePos.push(knightPossibleMoves[j]);
                         }
                     }
                 }
-                if (boardType[i]['type'] == 'queen') {
-                    let queenPossibleMoves = rookMoves(i, color, boardType);
-                    queenPossibleMoves = queenPossibleMoves.concat(bishopMoves(i, color, boardType));
+                if (boardType[i]['type'].includes('queen')) {
+                    let queenPossibleMoves = rookMoves(i, color, boardType).concat(bishopMoves(i, color, boardType));
                     for (let j = 0; j < queenPossibleMoves.length; j++) {
-                        if (isMoveLegal(i, queenPossibleMoves[j])) {
+                        if (isMoveLegal(i, queenPossibleMoves[j], boardType)) {
                             colorAccessiblePos.push(queenPossibleMoves[j]);
                         }
                     }
                 }
-                if (boardType[i]['type'] == 'king') {
-                    let kingPossibleMoves = kingMoves(i, color, boardType);
-                    kingPossibleMoves = kingPossibleMoves.concat(kingMoves(i, color, boardType));
+                if (boardType[i]['type'].includes('king')) {
+                    const kingPossibleMoves = kingMoves(i, color, boardType);
                     for (let j = 0; j < kingPossibleMoves.length; j++) {
-                        if (isMoveLegal(i, kingPossibleMoves[j])) {
+                        if (isMoveLegal(i, kingPossibleMoves[j], boardType)) {
                             colorAccessiblePos.push(kingPossibleMoves[j]);
                         }
                     }
@@ -1014,24 +1068,22 @@ function isCheckMate(color, boardType) {
 }
 /* A FAIRE
 
-- AFFICHAGE DES PIECES MORTES 
-- HISTORIQUES DES COUPS
-- SAVE LES BOARD COPY POUR HISTORIQUE TU CONNAIS A VOIR
-- EGALITE
-- TRANSFORMATION DE PION
-
-- EN TERME DE CODE : 
-    - fonction qui update les touches mortes et calcule la diff de points + ajoute un coup dans lhistorique
-    - tranformation de pion
-    - voir toutes les egalites
-    - voir si d'autre trucs a faire
-    - fix roc si case +1 ou -1 est menacée et si sous echec pas possible
-    - maybe mettre startedEP en var
+- historique : 
+    - affichage des coups
+    - lien sur l'autre les anciens board // dur
+- egalite : 
+    - Dead Position // dur
+    - Mutual Agreement
+    - Threefold Repetition // peut etre dur
+- systeme de gameOver :
+    - affichage de fin
+- promotion : 
+    - pop up qui permet de choisir en quoi se transformer
 
 EGALITE :
 - Stalemate / fait
 - Dead Position / a faire
 - Mutual Agreement / a faire - facile
 - Threefold Repetition / a faire
-- 50-Move Rule / a faire
+- 50-Move Rule / fait
 */
