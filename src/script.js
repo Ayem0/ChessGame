@@ -107,7 +107,7 @@ let countTo50 = 0;
 let accessiblePos = [];
 
 createBoard(board);
-
+/*
 function createBoard(boardType) {
     const boardDiv = document.getElementById('board');
     const aToH = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
@@ -151,6 +151,53 @@ function createBoard(boardType) {
                     n++;
                 }
             }
+            boardDiv.appendChild(div);
+        }
+    }
+}*/
+function createBoard(boardType) {
+    const boardDiv = document.getElementById('board');
+    const aToH = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    let n = 0;
+    for (let i = 8; i > 0; i--) { 
+        for (let j = 0; j < 8; j++) {
+            const text = document.createElement("p");
+            const text2 = document.createElement("p");
+            const div = document.createElement('div');
+            div.setAttribute('id', n);
+            div.addEventListener('drop', drop);
+            div.addEventListener('dragover', dragOver);
+            if (boardType[n] != '') {
+                const divPiece = document.createElement('div');
+                const img = document.createElement('img');
+                divPiece.setAttribute('draggable', true);
+                divPiece.addEventListener('dragstart', dragStart);
+                divPiece.addEventListener('dragend', dragEnd);
+                divPiece.addEventListener('dragover', dragOver);
+                divPiece.classList.add(boardType[n]['type'], boardType[n]['color'], 'piece');
+                img.src = boardType[n]['img'];
+                img.classList.add('piece-img');
+                divPiece.appendChild(img);
+                div.appendChild(divPiece);
+            }
+            if ((j + i) % 2 == 0) {
+                div.classList.add('beige');
+                text.classList.add("start-0");
+                text2.classList.add("end-0");
+            } else {
+                div.classList.add('green');
+                text.classList.add("start-1");
+                text2.classList.add("end-1");
+            }
+            if (j == 0 ) {
+                text.innerText = i;
+                div.appendChild(text);
+            }
+            if (i == 1) {
+                text2.innerText = aToH[j];
+                div.appendChild(text2);
+            }
+            n++;
             boardDiv.appendChild(div);
         }
     }
@@ -365,7 +412,15 @@ function movePiece(boardType, endPos, startPos) {
         const rook = boardType[startingPos + 3];
         boardType[startingPos + 3] = '';
         boardType[startingPos + 1] = rook;
-        const rookMoving = document.getElementById(startingPos + 3).firstChild;
+        let rookMoving = document.getElementById(startingPos + 3);
+        if (rookMoving.firstChild) {
+            var children = rookMoving.childNodes;
+            for (var i = children.length - 1; i >= 0; i--) {
+                if (children[i].nodeName !== 'P') {
+                    rookMoving = children[i];
+                }
+            }
+        }
         const rookEnd = document.getElementById(startingPos + 1);
         rookEnd.appendChild(rookMoving);
     }
@@ -373,7 +428,15 @@ function movePiece(boardType, endPos, startPos) {
         const rook = boardType[startingPos - 4];
         boardType[startingPos - 4] = '';
         boardType[startingPos - 1] = rook;
-        const rookMoving = document.getElementById(startingPos - 4).firstChild;
+        let rookMoving = document.getElementById(startingPos - 4).firstChild;
+        if (rookMoving.firstChild) {
+            var children = rookMoving.childNodes;
+            for (var i = children.length - 1; i >= 0; i--) {
+                if (children[i].nodeName !== 'P') {
+                    rookMoving = children[i];
+                }
+            }
+        }
         const rookEnd = document.getElementById(startingPos - 1);
         rookEnd.appendChild(rookMoving);
     }
@@ -390,26 +453,51 @@ function movePiece(boardType, endPos, startPos) {
     boardType[endingPos] = piece;
     console.log(boardType);
     // modifier le board affiché
-    const pieceMoving = document.getElementById(startingPos);
-    const tileSelected = document.getElementById(endingPos);
-    // A MODIFIER ICI
-    if ( tileSelected.firstChild) {
-        tileSelected.removeChild(tileSelected.firstChild);
+    let pieceMoving = document.getElementById(startingPos);
+    let tileSelected = document.getElementById(endingPos);
+    if (pieceMoving.firstChild) {
+        var children = pieceMoving.childNodes;
+        for (var i = children.length - 1; i >= 0; i--) {
+            if (children[i].nodeName !== 'P') {
+                pieceMoving = children[i];
+            }
+        }
     }
-    tileSelected.appendChild(pieceMoving.firstChild);
-
+    if (tileSelected.firstChild) {
+        var children = tileSelected.childNodes;
+        for (var i = children.length - 1; i >= 0; i--) {
+            if (children[i].nodeName !== 'P') {
+                tileSelected.removeChild(children[i]);
+            }
+        }
+    } 
+    tileSelected.appendChild(pieceMoving);
     // PROMOTION DE PION // A MODIFIER AVEC UN POPUP ET TRANSFORMER EN FONCTION DU POP UP // en attendant la selection empecher les mouvements 
     if ( piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos >= 0 && endingPos < 8) {
         boardType[endingPos] = {...wQ};
-        tileSelected.firstChild.className = "";
-        tileSelected.firstChild.classList.add('transformed-queen', 'white', 'piece');
-        tileSelected.firstChild.firstChild.src = wQImg;
+        if (tileSelected.firstChild) {
+            var children = tileSelected.childNodes;
+            for (var i = children.length - 1; i >= 0; i--) {
+                if (children[i].nodeName !== 'P') {
+                   children[i].className = "";
+                   children[i].classList.add('transformed-queen', 'white', 'piece');
+                   children[i].firstChild.src = wQImg;
+                }
+            }
+        }
     }
     if ( piece['type'].includes('pawn') && piece['color'] == 'black' && endingPos <= 63 && endingPos > 55) {
         boardType[endingPos] = {...bQ};
-        tileSelected.firstChild.className = "";
-        tileSelected.firstChild.classList.add('transformed-queen', 'black', 'piece');
-        tileSelected.firstChild.firstChild.src = bQImg;
+        if (tileSelected.firstChild) {
+            var children = tileSelected.childNodes;
+            for (var i = children.length - 1; i >= 0; i--) {
+                if (children[i].nodeName !== 'P') {
+                   children[i].className = "";
+                   children[i].classList.add('transformed-queen', 'black', 'piece');
+                   children[i].firstChild.src = bQImg;
+                }
+            }
+        }
     }
     // EN PASSANT
     // si en passant supprime la piece started en passant
@@ -418,20 +506,29 @@ function movePiece(boardType, endPos, startPos) {
         blackDeadPieces.push(boardType[started]); 
         console.log(blackDeadPieces);
         boardType[started] = '';
-        const deadStartedEP = document.getElementById(started);
+        let deadStartedEP = document.getElementById(started);
         if (deadStartedEP.firstChild) {
-            // ajouter un update des info black ou white
-            deadStartedEP.removeChild(deadStartedEP.firstChild);
+            var children = deadStartedEP.childNodes;
+            for (var i = children.length - 1; i >= 0; i--) {
+                if (children[i].nodeName !== 'P') {
+                    deadStartedEP.removeChild(children[i]);
+                }
+            }
         }
     }
     if (piece['type'].includes('pawn') && piece['color'] == 'black' && endingPos == started + 8) {
         whiteDeadPieces.push(boardType[started]); 
         console.log(whiteDeadPieces);
         boardType[started] = ''; 
-        const deadStartedEP = document.getElementById(started);
+        let deadStartedEP = document.getElementById(started);
         if (deadStartedEP.firstChild) {
             // ajouter un update des info black ou white
-            deadStartedEP.removeChild(deadStartedEP.firstChild);
+            var children = deadStartedEP.childNodes;
+            for (var i = children.length - 1; i >= 0; i--) {
+                if (children[i].nodeName !== 'P') {
+                    deadStartedEP.removeChild(children[i]);
+                }
+            }
         }
     }
     // reset en passant ici
@@ -892,7 +989,7 @@ function isMoveLegal(startPos, endPos, boardType) {
             return false;
         } else {
             boardCopy[startingPos] = '';
-            boardCopy[parstartingPos - 1] = piece;
+            boardCopy[startingPos - 1] = piece;
             if ( isCheck(pieceColor, boardCopy)) {
                 return false;
             } else {
@@ -1075,6 +1172,7 @@ function isCheckMate(color, boardType) {
     - Dead Position // dur
     - Mutual Agreement
     - Threefold Repetition // peut etre dur
+    - nombre de piece insufisant
 - systeme de gameOver :
     - affichage de fin
 - promotion : 
