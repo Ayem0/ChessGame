@@ -557,7 +557,7 @@ function createTurn(boardType, endPos, startPos) {
     if ( piece['type'].includes('rook')) {
         const img = document.createElement('img');
         ( piece['color'] == 'white') ? img.src = wRImg : img.src = bRImg;
-        img.classList.add('hud-img');
+        img.classList.add('history-img');
         newDiv.appendChild(img);
         for (let i = 0; i < boardType.length; i++) {
             const element = boardType[i];
@@ -569,7 +569,7 @@ function createTurn(boardType, endPos, startPos) {
     if ( piece['type'].includes('bishop'))  {
         const img = document.createElement('img');
         ( piece['color'] == 'white') ? img.src = wBImg : img.src = bBImg;
-        img.classList.add('hud-img');
+        img.classList.add('history-img');
         newDiv.appendChild(img);
         for (let i = 0; i < boardType.length; i++) {
             const element = boardType[i];
@@ -581,7 +581,7 @@ function createTurn(boardType, endPos, startPos) {
     if ( piece['type'] == 'king') {
         const img = document.createElement('img');
         ( piece['color'] == 'white') ? img.src = wKImg : img.src = bKImg;
-        img.classList.add('hud-img');
+        img.classList.add('history-img');
         newDiv.appendChild(img);
         if ( parseInt(endPos) == parseInt(startingPos) + 2) {
             move = '0-0';
@@ -593,7 +593,7 @@ function createTurn(boardType, endPos, startPos) {
     if ( piece['type'].includes('queen'))  {
         const img = document.createElement('img');
         ( piece['color'] == 'white') ? img.src = wQImg : img.src = bQImg;
-        img.classList.add('hud-img');
+        img.classList.add('history-img');
         newDiv.appendChild(img);
         for (let i = 0; i < boardType.length; i++) {
             const element = boardType[i];
@@ -605,7 +605,7 @@ function createTurn(boardType, endPos, startPos) {
     if ( piece['type'].includes('knight'))  {
         const img = document.createElement('img');
         ( piece['color'] == 'white') ? img.src = wNImg : img.src = bNImg;
-        img.classList.add('hud-img');
+        img.classList.add('history-img');
         newDiv.appendChild(img);
         for (let i = 0; i < boardType.length; i++) {
             const element = boardType[i];
@@ -615,7 +615,7 @@ function createTurn(boardType, endPos, startPos) {
         }
     }
     if ( samePiecesMoves.includes(endPos)) {
-        const tile = document.getElementById(endPos);
+        const tile = document.getElementById(startPos);
         const pos = tile.classList[0];
         move = pos + move;
     }
@@ -638,7 +638,7 @@ function createTurn(boardType, endPos, startPos) {
     const oppositeColor = getOppositeColor(piece['color']);
     if ( isCheck(oppositeColor, boardType)) {
         if ( isCheckMate(oppositeColor, boardType)) {
-            move = move + '++';
+            move = move + '#';
         } else {
             move = move + '+';
         }

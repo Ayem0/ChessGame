@@ -79,75 +79,41 @@ body {
 
 .start-0 {
     position: absolute;
-    top: 5px; /* Alignement en haut */
-    left: 5px; /* Alignement à gauche */
+    top: 4px; /* Alignement en haut */
+    left: 8px; /* Alignement à gauche */
     color: rgb(115,149,82);
-    font-size: 20px;
+    font-size: 22px;
     padding: 0;
     margin: 0;
 }
 
 .start-1 {
     position: absolute;
-    top: 5px; /* Alignement en haut */
-    left: 5px; /* Alignement à gauche */
+    top: 4px; /* Alignement en haut */
+    left: 8px; /* Alignement à gauche */
     color: rgb(188, 190, 145); 
-    font-size: 20px;
+    font-size: 22px;
     padding: 0;
     margin: 0;
 }
 
 .end-0 {
     position: absolute;
-    bottom: 5px; /* Alignement en bas */
-    right: 5px; /* Alignement à droite */
+    bottom: 4px; /* Alignement en bas */
+    right: 8px; /* Alignement à droite */
     color: rgb(115,149,82); 
-    font-size: 20px;
+    font-size: 22px;
     padding: 0;
     margin: 0;
 }
 .end-1 {
     position: absolute;
-    bottom: 5px; /* Alignement en bas */
-    right: 5px; /* Alignement à droite */
+    bottom: 4px; /* Alignement en bas */
+    right: 8px; /* Alignement à droite */
     color: rgb(188, 190, 145);
-    font-size: 20px;
+    font-size: 22px;
     padding: 0;
     margin: 0;
-}
-
-
-.vertical {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 90px;
-    width: 25px;
-    background-color: gray;
-    position: relative;
-    color: white;
-    font-size: 20px;
-}
-.vertical-horizontal {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 30px;
-    width: 25px;
-    background-color: gray;
-    position: relative;
-}
-
-.horizontal {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 30px;
-    width: 90px;
-    background-color: gray;
-    position: relative;
-    color: white;
-    font-size: 20px;
 }
 
 .piece {
@@ -172,6 +138,11 @@ body {
 .hud-img {
     height: 24px;
     width: 24px;
+}
+
+.history-img {
+    height: 20px;
+    width: 20px;
 }
 
 .accessible {
@@ -203,12 +174,11 @@ body {
 
 .container-inline {
     display: flex;
-    padding-top: 10px;
 }
 
 .padding-left {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-left: 15px;
+    padding: 10px;
 }
