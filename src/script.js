@@ -110,6 +110,7 @@ createBoard(board);
 
 function createBoard(boardType) {
     const boardDiv = document.getElementById('board');
+    boardDiv.textContent = '';
     const aToH = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     let n = 0;
     for (let i = 8; i > 0; i--) { 
@@ -429,28 +430,21 @@ function movePiece(boardType, endPos, startPos) {
     } 
     tileSelected.appendChild(pieceMoving);
     // PROMOTION DE PION // A MODIFIER AVEC UN POPUP ET TRANSFORMER EN FONCTION DU POP UP // en attendant la selection empecher les mouvements 
-    if ( piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos >= 0 && endingPos < 8) {
-        boardType[endingPos] = {...wQ};
+    if ( piece['type'].includes('pawn') && (endingPos >= 0 && endingPos < 8 || endingPos <= 63 && endingPos > 55)) {
         if (tileSelected.firstChild) {
             var children = tileSelected.childNodes;
             for (var i = children.length - 1; i >= 0; i--) {
                 if (children[i].nodeName !== 'P') {
                    children[i].className = "";
-                   children[i].classList.add('queen-transformed', 'white', 'piece');
-                   children[i].firstChild.src = wQImg;
-                }
-            }
-        }
-    }
-    if ( piece['type'].includes('pawn') && piece['color'] == 'black' && endingPos <= 63 && endingPos > 55) {
-        boardType[endingPos] = {...bQ};
-        if (tileSelected.firstChild) {
-            var children = tileSelected.childNodes;
-            for (var i = children.length - 1; i >= 0; i--) {
-                if (children[i].nodeName !== 'P') {
-                   children[i].className = "";
-                   children[i].classList.add('queen-transformed', 'black', 'piece');
-                   children[i].firstChild.src = bQImg;
+                    if ( piece['color'] == 'white') {
+                        children[i].classList.add('queen-transformed', 'white', 'piece');
+                        children[i].firstChild.src = wQImg;
+                        boardType[endingPos] = {...wQ};
+                    } else {
+                        children[i].classList.add('queen-transformed', 'black', 'piece');
+                        children[i].firstChild.src = bQImg;
+                        boardType[endingPos] = {...bQ};
+                    }
                 }
             }
         }
@@ -505,11 +499,13 @@ function createTurn(boardType, endPos, startPos) {
     const piece = boardType[startingPos];
     const history = document.getElementById('history');
     const newDiv = document.createElement('div');
+    
     newDiv.classList.add('padding-left');
     const span = document.createElement('span');
     let div;
     const moveName = document.getElementById(endPos);
     move = moveName.classList[0];
+    let samePiecesMoves = [];
     if ( moveHistory.length != 0 && moveHistory.length %2 != 0) {
         let text;
         if (moveHistory.length != 1) {
@@ -519,7 +515,6 @@ function createTurn(boardType, endPos, startPos) {
         }
         span.classList.add('black');
         div = document.getElementById(text);
-        div.appendChild(newDiv);
     } else {
         div = document.createElement('div');
         const index = document.createElement('span');
@@ -534,25 +529,20 @@ function createTurn(boardType, endPos, startPos) {
         div.classList.add('container-inline');
         history.appendChild(div);
         div.appendChild(index);
-        div.appendChild(newDiv);
         span.classList.add('white');
     }
+    div.appendChild(newDiv);
     if ( boardType[endPos] != '') {
         move = 'x' + move;
     }
     if ( piece['type'] == 'pawn') {
-        let samePiecesMoves = [];
         for (let i = 0; i < boardType.length; i++) {
             const element = boardType[i];
             if ( element['type'] && element['type'] == piece['type'] && element['color'] == piece['color'] && startingPos != i) {
                 samePiecesMoves = samePiecesMoves.concat(pawnMoves(i, piece['color'], boardType));
             }
         }
-        if ( samePiecesMoves.includes(endPos)) {
-            const tile = document.getElementById(endPos);
-            const pos = tile.classList[0];
-            move = pos + move;
-        }
+        
         const posEnpassant = getStartedEP(boardType);
         if ( piece['color'] == 'white') {
             if ( endPos == posEnpassant - 8) {
@@ -569,17 +559,11 @@ function createTurn(boardType, endPos, startPos) {
         ( piece['color'] == 'white') ? img.src = wRImg : img.src = bRImg;
         img.classList.add('hud-img');
         newDiv.appendChild(img);
-        let samePiecesMoves = [];
         for (let i = 0; i < boardType.length; i++) {
             const element = boardType[i];
             if (element['type'] && element['type'].includes('rook') && element['color'] == piece['color'] && startingPos != i) {
                 samePiecesMoves = samePiecesMoves.concat(rookMoves(i, piece['color'], boardType));
             }
-        }
-        if ( samePiecesMoves.includes(endPos)) {
-            const tile = document.getElementById(startingPos);
-            const pos = tile.classList[0];
-            move = pos + move;
         }
     }
     if ( piece['type'].includes('bishop'))  {
@@ -587,17 +571,11 @@ function createTurn(boardType, endPos, startPos) {
         ( piece['color'] == 'white') ? img.src = wBImg : img.src = bBImg;
         img.classList.add('hud-img');
         newDiv.appendChild(img);
-        let samePiecesMoves = [];
         for (let i = 0; i < boardType.length; i++) {
             const element = boardType[i];
             if (element['type'] && element['type'].includes('bishop') && element['color'] == piece['color'] && startingPos != i) {
                 samePiecesMoves = samePiecesMoves.concat(bishopMoves(i, piece['color'], boardType));
             }
-        }
-        if ( samePiecesMoves.includes(endPos)) {
-            const tile = document.getElementById(startingPos);
-            const pos = tile.classList[0];
-            move = pos + move;
         }
     }
     if ( piece['type'] == 'king') {
@@ -617,17 +595,11 @@ function createTurn(boardType, endPos, startPos) {
         ( piece['color'] == 'white') ? img.src = wQImg : img.src = bQImg;
         img.classList.add('hud-img');
         newDiv.appendChild(img);
-        let samePiecesMoves = [];
         for (let i = 0; i < boardType.length; i++) {
             const element = boardType[i];
             if (element['type'] && element['type'].includes('queen') && element['color'] == piece['color'] && startingPos != i) {
                 samePiecesMoves = samePiecesMoves.concat(rookMoves(i, piece['color'], boardType), bishopMoves(i, piece['color'], boardType));
             }
-        }
-        if ( samePiecesMoves.includes(endPos)) {
-            const tile = document.getElementById(startingPos);
-            const pos = tile.classList[0];
-            move = pos + move;
         }
     }
     if ( piece['type'].includes('knight'))  {
@@ -635,18 +607,17 @@ function createTurn(boardType, endPos, startPos) {
         ( piece['color'] == 'white') ? img.src = wNImg : img.src = bNImg;
         img.classList.add('hud-img');
         newDiv.appendChild(img);
-        let samePiecesMoves = [];
         for (let i = 0; i < boardType.length; i++) {
             const element = boardType[i];
             if (element['type'] && element['type'].includes('knight') && element['color'] == piece['color'] && startingPos != i) {
                 samePiecesMoves = samePiecesMoves.concat(knightMoves(i, piece['color'], boardType));
             }
         }
-        if ( samePiecesMoves.includes(endPos)) {
-            const tile = document.getElementById(startingPos);
-            const pos = tile.classList[0];
-            move = pos + move;
-        }
+    }
+    if ( samePiecesMoves.includes(endPos)) {
+        const tile = document.getElementById(endPos);
+        const pos = tile.classList[0];
+        move = pos + move;
     }
     if ( piece['type'] == 'king' && parseInt(endPos) == parseInt(startingPos) + 2) {
         move = '0-0';
@@ -676,6 +647,12 @@ function createTurn(boardType, endPos, startPos) {
     newDiv.appendChild(span);
     moveHistory.push(move);
     boardHistory.push(boardType);
+    const boardIndex = boardHistory.length-1;
+    newDiv.onclick= () => {
+        if (gameOver) {
+            createBoard(boardHistory[boardIndex]);
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
