@@ -94,7 +94,7 @@ const blackDeadPieces = [];
 // si game fini
 let gameOver = false;
 // historique des coups joués
-const history = [];
+const moveHistory = [];
 const boardHistory = [];
 // var pour castle
 let wCastleRight = true;
@@ -107,54 +107,7 @@ let countTo50 = 0;
 let accessiblePos = [];
 
 createBoard(board);
-/*
-function createBoard(boardType) {
-    const boardDiv = document.getElementById('board');
-    const aToH = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-    let n = 0;
-    for (let i = 8; i > -2; i--) { 
-        for (let j = 0; j < 10; j++) {
-            const div = document.createElement('div');
-            if (i == -1 || i == 8) {
-                if ( j != 0 && j != 9) {
-                div.textContent = aToH[j-1];
-                div.classList.add('horizontal');
-                } else {
-                    div.classList.add('vertical-horizontal');
-                }
-            } else {
-                if (j == 0 || j == 9) {
-                    div.textContent = i+1;
-                    div.classList.add('vertical');
-                } else {
-                    div.setAttribute('id', n);
-                    div.addEventListener('drop', drop);
-                    div.addEventListener('dragover', dragOver);
-                    if (boardType[n] != '') {
-                        const divPiece = document.createElement('div');
-                        const img = document.createElement('img');
-                        divPiece.setAttribute('draggable', true);
-                        divPiece.addEventListener('dragstart', dragStart);
-                        divPiece.addEventListener('dragend', dragEnd);
-                        divPiece.addEventListener('dragover', dragOver);
-                        divPiece.classList.add(boardType[n]['type'], boardType[n]['color'], 'piece');
-                        img.src = boardType[n]['img'];
-                        img.classList.add('piece-img');
-                        divPiece.appendChild(img);
-                        div.appendChild(divPiece);
-                    }
-                    if ((j + i) % 2 == 0) {
-                        div.classList.add('beige');
-                    } else {
-                        div.classList.add('green');
-                    }
-                    n++;
-                }
-            }
-            boardDiv.appendChild(div);
-        }
-    }
-}*/
+
 function createBoard(boardType) {
     const boardDiv = document.getElementById('board');
     const aToH = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
@@ -165,6 +118,7 @@ function createBoard(boardType) {
             const text2 = document.createElement("p");
             const div = document.createElement('div');
             div.setAttribute('id', n);
+            div.classList.add(aToH[j] + i)
             div.addEventListener('drop', drop);
             div.addEventListener('dragover', dragOver);
             if (boardType[n] != '') {
@@ -356,7 +310,9 @@ function drop(event) {
         if (turn == color && !gameOver) {
             for (let i = 0; i < legalMoves.length; i++) {
                 if (legalMoves[i] == posEnd) {
+                    const boardCopy = [...board];
                     movePiece(board, posEnd, startPosition);
+                    createTurn(boardCopy, posEnd, startPosition);
                     updateBoardInfo(whiteDeadPieces, blackDeadPieces);
                     if (isCheck(oppositeColor, board)) {
                         if (isCheckMate(oppositeColor, board)) {
@@ -448,11 +404,11 @@ function movePiece(boardType, endPos, startPos) {
             blackDeadPieces.push(boardType[endingPos]);
         }
     } 
-    // supprime la piece
+    // supprime la piece si existe et bouge la piece dans le board
     boardType[startingPos] = '';
     boardType[endingPos] = piece;
     console.log(boardType);
-    // modifier le board affiché
+    // supprime la piece si existe et bouge la piece dans le board affiché
     let pieceMoving = document.getElementById(startingPos);
     let tileSelected = document.getElementById(endingPos);
     if (pieceMoving.firstChild) {
@@ -480,7 +436,7 @@ function movePiece(boardType, endPos, startPos) {
             for (var i = children.length - 1; i >= 0; i--) {
                 if (children[i].nodeName !== 'P') {
                    children[i].className = "";
-                   children[i].classList.add('transformed-queen', 'white', 'piece');
+                   children[i].classList.add('queen-transformed', 'white', 'piece');
                    children[i].firstChild.src = wQImg;
                 }
             }
@@ -493,7 +449,7 @@ function movePiece(boardType, endPos, startPos) {
             for (var i = children.length - 1; i >= 0; i--) {
                 if (children[i].nodeName !== 'P') {
                    children[i].className = "";
-                   children[i].classList.add('transformed-queen', 'black', 'piece');
+                   children[i].classList.add('queen-transformed', 'black', 'piece');
                    children[i].firstChild.src = bQImg;
                 }
             }
@@ -514,6 +470,7 @@ function movePiece(boardType, endPos, startPos) {
                     deadStartedEP.removeChild(children[i]);
                 }
             }
+            
         }
     }
     if (piece['type'].includes('pawn') && piece['color'] == 'black' && endingPos == started + 8) {
@@ -540,6 +497,185 @@ function movePiece(boardType, endPos, startPos) {
     if (piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == startingPos - 16) {
         boardType[endingPos]['startedEP'] = true;
     }
+}
+
+function createTurn(boardType, endPos, startPos) {
+    let move = '';
+    const startingPos = parseInt(startPos);
+    const piece = boardType[startingPos];
+    const history = document.getElementById('history');
+    const newDiv = document.createElement('div');
+    newDiv.classList.add('padding-left');
+    const span = document.createElement('span');
+    let div;
+    const moveName = document.getElementById(endPos);
+    move = moveName.classList[0];
+    if ( moveHistory.length != 0 && moveHistory.length %2 != 0) {
+        let text;
+        if (moveHistory.length != 1) {
+            text = 'turn-' + (moveHistory.length-1);
+        } else {
+            text = 'turn-' + moveHistory.length;
+        }
+        span.classList.add('black');
+        div = document.getElementById(text);
+        div.appendChild(newDiv);
+    } else {
+        div = document.createElement('div');
+        const index = document.createElement('span');
+        index.classList.add('padding-left');
+        if ( moveHistory.length == 0) {
+            div.setAttribute('id', 'turn-' + (moveHistory.length+1));
+            index.textContent = (moveHistory.length+1) + '.';
+        } else {
+            div.setAttribute('id', 'turn-' + (moveHistory.length));
+            index.textContent = (moveHistory.length) + '.';
+        }
+        div.classList.add('container-inline');
+        history.appendChild(div);
+        div.appendChild(index);
+        div.appendChild(newDiv);
+        span.classList.add('white');
+    }
+    if ( boardType[endPos] != '') {
+        move = 'x' + move;
+    }
+    if ( piece['type'] == 'pawn') {
+        let samePiecesMoves = [];
+        for (let i = 0; i < boardType.length; i++) {
+            const element = boardType[i];
+            if ( element['type'] && element['type'] == piece['type'] && element['color'] == piece['color'] && startingPos != i) {
+                samePiecesMoves = samePiecesMoves.concat(pawnMoves(i, piece['color'], boardType));
+            }
+        }
+        if ( samePiecesMoves.includes(endPos)) {
+            const tile = document.getElementById(endPos);
+            const pos = tile.classList[0];
+            move = pos + move;
+        }
+        const posEnpassant = getStartedEP(boardType);
+        if ( piece['color'] == 'white') {
+            if ( endPos == posEnpassant - 8) {
+                move = 'x' + move + ' ep';
+            }
+        } else {
+            if ( endPos == posEnpassant + 8) {
+                move = 'x' + move + ' ep';
+            }
+        }
+    }
+    if ( piece['type'].includes('rook')) {
+        const img = document.createElement('img');
+        ( piece['color'] == 'white') ? img.src = wRImg : img.src = bRImg;
+        img.classList.add('hud-img');
+        newDiv.appendChild(img);
+        let samePiecesMoves = [];
+        for (let i = 0; i < boardType.length; i++) {
+            const element = boardType[i];
+            if (element['type'] && element['type'].includes('rook') && element['color'] == piece['color'] && startingPos != i) {
+                samePiecesMoves = samePiecesMoves.concat(rookMoves(i, piece['color'], boardType));
+            }
+        }
+        if ( samePiecesMoves.includes(endPos)) {
+            const tile = document.getElementById(startingPos);
+            const pos = tile.classList[0];
+            move = pos + move;
+        }
+    }
+    if ( piece['type'].includes('bishop'))  {
+        const img = document.createElement('img');
+        ( piece['color'] == 'white') ? img.src = wBImg : img.src = bBImg;
+        img.classList.add('hud-img');
+        newDiv.appendChild(img);
+        let samePiecesMoves = [];
+        for (let i = 0; i < boardType.length; i++) {
+            const element = boardType[i];
+            if (element['type'] && element['type'].includes('bishop') && element['color'] == piece['color'] && startingPos != i) {
+                samePiecesMoves = samePiecesMoves.concat(bishopMoves(i, piece['color'], boardType));
+            }
+        }
+        if ( samePiecesMoves.includes(endPos)) {
+            const tile = document.getElementById(startingPos);
+            const pos = tile.classList[0];
+            move = pos + move;
+        }
+    }
+    if ( piece['type'] == 'king') {
+        const img = document.createElement('img');
+        ( piece['color'] == 'white') ? img.src = wKImg : img.src = bKImg;
+        img.classList.add('hud-img');
+        newDiv.appendChild(img);
+        if ( parseInt(endPos) == parseInt(startingPos) + 2) {
+            move = '0-0';
+        }
+        if ( parseInt(endPos) == parseInt(startingPos) - 2) {
+            move = '0-0-0';
+        }
+    }
+    if ( piece['type'].includes('queen'))  {
+        const img = document.createElement('img');
+        ( piece['color'] == 'white') ? img.src = wQImg : img.src = bQImg;
+        img.classList.add('hud-img');
+        newDiv.appendChild(img);
+        let samePiecesMoves = [];
+        for (let i = 0; i < boardType.length; i++) {
+            const element = boardType[i];
+            if (element['type'] && element['type'].includes('queen') && element['color'] == piece['color'] && startingPos != i) {
+                samePiecesMoves = samePiecesMoves.concat(rookMoves(i, piece['color'], boardType), bishopMoves(i, piece['color'], boardType));
+            }
+        }
+        if ( samePiecesMoves.includes(endPos)) {
+            const tile = document.getElementById(startingPos);
+            const pos = tile.classList[0];
+            move = pos + move;
+        }
+    }
+    if ( piece['type'].includes('knight'))  {
+        const img = document.createElement('img');
+        ( piece['color'] == 'white') ? img.src = wNImg : img.src = bNImg;
+        img.classList.add('hud-img');
+        newDiv.appendChild(img);
+        let samePiecesMoves = [];
+        for (let i = 0; i < boardType.length; i++) {
+            const element = boardType[i];
+            if (element['type'] && element['type'].includes('knight') && element['color'] == piece['color'] && startingPos != i) {
+                samePiecesMoves = samePiecesMoves.concat(knightMoves(i, piece['color'], boardType));
+            }
+        }
+        if ( samePiecesMoves.includes(endPos)) {
+            const tile = document.getElementById(startingPos);
+            const pos = tile.classList[0];
+            move = pos + move;
+        }
+    }
+    if ( piece['type'] == 'king' && parseInt(endPos) == parseInt(startingPos) + 2) {
+        move = '0-0';
+    }
+    if ( piece['type'] == 'king' && parseInt(endPos) == parseInt(startingPos) - 2) {
+        move = '0-0-0';
+    }
+    if ( piece['type'] == 'pawn' && (endPos >= 0 && endPos < 8 || endPos <= 63 && endPos > 55)) {
+        const transformedPiece = board[endPos];
+        if ( transformedPiece['type'] == 'knight' || transformedPiece['type'] == 'knight-transformed' ) {
+            move = move + 'n';
+        } else {
+            move = move + board[endPos]['type'][0];
+        }
+    }
+    boardType[startingPos] = '';
+    boardType[endPos] = piece;
+    const oppositeColor = getOppositeColor(piece['color']);
+    if ( isCheck(oppositeColor, boardType)) {
+        if ( isCheckMate(oppositeColor, boardType)) {
+            move = move + '++';
+        } else {
+            move = move + '+';
+        }
+    }
+    span.textContent = move;
+    newDiv.appendChild(span);
+    moveHistory.push(move);
+    boardHistory.push(boardType);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -655,7 +791,7 @@ function rookMoves(startId, color, boardType) {
         }
     }
     // deplacement vers la gauche
-    if (startPos % 8 >= 1) {
+    if (startPos % 8 > 0) {
         let count = 0;
         for (let i = startPos % 8; i > 0; i--) {
             count++;
@@ -812,7 +948,7 @@ function knightMoves(startId, color, boardType) {
         }
     }
     // deplacement de 2 cases a droite 1 case vers le haut
-    if (startPos / 8 >= 1 && startPos % 8 <= 5) {
+    if (startPos / 8 >= 1 && startPos % 8 < 6) {
         if (boardType[startPos - 6] != '') {
             if (boardType[startPos - 6]['color'] == oppositeColor) {
                 possibleMoves.push(startPos - 6);
@@ -823,7 +959,7 @@ function knightMoves(startId, color, boardType) {
         }
     }
     // deplacement de 2 case vers la droite 1 case vers le bas
-    if (startPos / 8 <= 7 && startPos % 8 <= 5) {
+    if (startPos / 8 < 7 && startPos % 8 < 6) {
         if (boardType[startPos + 10] != '') {
             if (boardType[startPos + 10]['color'] == oppositeColor) {
                 possibleMoves.push(startPos + 10);
@@ -834,7 +970,7 @@ function knightMoves(startId, color, boardType) {
         }
     }
     // deplacement de 2 case vers la gauche 1 case vers le bas
-    if (startPos / 8 <= 7 && startPos % 8 >= 2) {
+    if (startPos / 8 < 7 && startPos % 8 > 1) {
         if (boardType[startPos + 6] != '') {
             if (boardType[startPos + 6]['color'] == oppositeColor) {
                 possibleMoves.push(startPos + 6);
@@ -845,7 +981,7 @@ function knightMoves(startId, color, boardType) {
         }
     }
     // deplacement de 2 case vers la gauche 1 case vers le haut
-    if (startPos / 8 >= 1 && startPos % 8 >= 2) {
+    if (startPos / 8 >= 1 && startPos % 8 > 1) {
         if (boardType[startPos - 10] != '') {
             if (boardType[startPos - 10]['color'] == oppositeColor) {
                 possibleMoves.push(startPos - 10);
@@ -1166,13 +1302,12 @@ function isCheckMate(color, boardType) {
 /* A FAIRE
 
 - historique : 
-    - affichage des coups
     - lien sur l'autre les anciens board // dur
 - egalite : 
-    - Dead Position // dur
-    - Mutual Agreement
+    - Dead Position // impossible
+    - Mutual Agreement // facile / chiant
     - Threefold Repetition // peut etre dur
-    - nombre de piece insufisant
+    - nombre de piece insufisant // peut etre dur
 - systeme de gameOver :
     - affichage de fin
 - promotion : 

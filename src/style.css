@@ -187,8 +187,28 @@ body {
 
 #history {
     display: inline;
-    height: 835px;
-    width: 300px;
-    background-color: black;
+    height: 798px;
+    width: 250px;
+    background-color: rgb(163, 159, 159);
     border-radius: 10px;
+}
+
+.white {
+    color: white;
+}
+
+.black {
+    color: black;
+}
+
+.container-inline {
+    display: flex;
+    padding-top: 10px;
+}
+
+.padding-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 15px;
 }
