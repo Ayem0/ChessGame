@@ -120,15 +120,19 @@ function createBoard(boardType) {
             const div = document.createElement('div');
             div.setAttribute('id', n);
             div.classList.add(aToH[j] + i)
-            div.addEventListener('drop', drop);
-            div.addEventListener('dragover', dragOver);
-            if (boardType[n] != '') {
+            if ( boardHistory.length == 0 || isArrayEqual(board, boardType)) {
+                div.addEventListener('drop', drop);
+                div.addEventListener('dragover', dragOver);
+            }
+            if (boardType[n] != '' ) {
                 const divPiece = document.createElement('div');
                 const img = document.createElement('img');
-                divPiece.setAttribute('draggable', true);
-                divPiece.addEventListener('dragstart', dragStart);
-                divPiece.addEventListener('dragend', dragEnd);
-                divPiece.addEventListener('dragover', dragOver);
+                if ( boardHistory.length == 0 || isArrayEqual(board, boardType)) {
+                    divPiece.setAttribute('draggable', true);
+                    divPiece.addEventListener('dragstart', dragStart);
+                    divPiece.addEventListener('dragend', dragEnd);
+                    divPiece.addEventListener('dragover', dragOver);
+                }
                 divPiece.classList.add(boardType[n]['type'], boardType[n]['color'], 'piece');
                 img.src = boardType[n]['img'];
                 img.classList.add('piece-img');
@@ -292,6 +296,16 @@ function dragStart(event) {
     }
 }
 
+function isArrayEqual(boardType, boardType2) {
+    for (let i = 0; i < boardType.length; i++) {
+        const element = boardType[i];
+        const element2 = boardType2[i];
+        if (element != element2) {
+            return false;
+        }
+    }
+    return true;
+}
 function drop(event) {
     event.stopPropagation();
     if (!gameOver) {
@@ -336,10 +350,26 @@ function drop(event) {
                             gameOver = true;
                             console.log('50 moves rule')
                         }
+                        let nb = 0;
+                        if (boardHistory.length !== 0) {
+                            const lastBoard = boardHistory[boardHistory.length - 1];
+                            for (let i = 0; i < boardHistory.length - 1; i++) {
+                                const element = boardHistory[i];
+                                if (isArrayEqual(lastBoard, element)) {
+                                    nb++;
+                                    if (nb === 2) {
+                                        console.log('Threefold Repetition');
+                                        gameOver = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                         // ajouter if ici pour autre egalité
                     }
                     turn = getOppositeColor(turn);
                     break;
+
                 }
             }
         }
@@ -385,7 +415,7 @@ function movePiece(boardType, endPos, startPos) {
         const rook = boardType[startingPos - 4];
         boardType[startingPos - 4] = '';
         boardType[startingPos - 1] = rook;
-        let rookMoving = document.getElementById(startingPos - 4).firstChild;
+        let rookMoving = document.getElementById(startingPos - 4);
         if (rookMoving.firstChild) {
             var children = rookMoving.childNodes;
             for (var i = children.length - 1; i >= 0; i--) {
@@ -524,7 +554,7 @@ function createTurn(boardType, endPos, startPos) {
             index.textContent = (moveHistory.length+1) + '.';
         } else {
             div.setAttribute('id', 'turn-' + (moveHistory.length));
-            index.textContent = (moveHistory.length) + '.';
+            index.textContent = (moveHistory.length / 2 + 1) + '.';
         }
         div.classList.add('container-inline');
         history.appendChild(div);
@@ -649,9 +679,9 @@ function createTurn(boardType, endPos, startPos) {
     boardHistory.push(boardType);
     const boardIndex = boardHistory.length-1;
     newDiv.onclick= () => {
-        if (gameOver) {
-            createBoard(boardHistory[boardIndex]);
-        }
+        
+        createBoard(boardHistory[boardIndex]);
+        
     }
 }
 
@@ -981,23 +1011,30 @@ function kingMoves(startId, color, boardType) {
     const startPos = parseInt(startId);
     const oppositeColor = getOppositeColor(color);
     const possibleMoves = [];
-    // castle blanc
+    // castle 
     // droite
-    if (color == 'white' && wCastleRight && boardType[startPos + 1] == '' && boardType[startPos + 2] == '' && boardType[startPos + 3]['type'] == 'rook-right' && boardType[startPos + 3]['color'] == 'white') {
-        possibleMoves.push(startPos + 2);
+    if (boardType[startPos + 1] == '' && boardType[startPos + 2] == '' && boardType[startPos + 3]['type'] == 'rook-right' && boardType[startPos + 3]['color'] == color) {
+        if ( color == 'white') {
+            if ( wCastleRight) {
+                possibleMoves.push(startPos + 2);
+            }
+        } else {
+            if ( bCastleRight) {
+                possibleMoves.push(startPos + 2);
+            }
+        }
     }
     // gauche
-    if (color == 'white' && wCastleLeft && boardType[startPos - 1] == '' && boardType[startPos - 2] == '' && boardType[startPos - 3] == '' && boardType[startPos - 4]['type'] == 'rook-left' && boardType[startPos - 4]['color'] == 'white') {
-        possibleMoves.push(startPos - 2);
-    }
-    // castle noir
-    // droite
-    if (color == 'black' && bCastleRight && boardType[startPos + 1] == '' && boardType[startPos + 2] == '' && boardType[startPos + 3]['type'] == 'rook-right' && boardType[startPos + 3]['color'] == 'black') {
-        possibleMoves.push(startPos + 2);
-    }
-    // gauche
-    if (color == 'black' && bCastleLeft && boardType[startPos - 1] == '' && boardType[startPos - 2] == '' && boardType[startPos - 3] == '' && boardType[startPos - 4]['type'] == 'rook-left' && boardType[startPos - 4]['color'] == 'black') {
-        possibleMoves.push(startPos - 2);
+    if (boardType[startPos - 1] == '' && boardType[startPos - 2] == '' && boardType[startPos - 3] == '' && boardType[startPos - 4]['type'] == 'rook-left' && boardType[startPos - 4]['color'] == color) {
+        if ( color == 'white') {
+            if ( wCastleLeft) {
+                possibleMoves.push(startPos - 2);
+            }
+        } else {
+            if ( bCastleLeft) {
+                possibleMoves.push(startPos - 2);
+            }
+        }
     }
     // calcule de la case du bas
     if (startPos / 8 < 7) {
@@ -1277,19 +1314,17 @@ function isCheckMate(color, boardType) {
     }
 }
 /* A FAIRE
-
-- historique : 
-    - lien sur l'autre les anciens board // dur
+- historique :
+    - uniquement le a au lieu de a1 mais bon
 - egalite : 
     - Dead Position // impossible
-    - Mutual Agreement // facile / chiant
-    - Threefold Repetition // peut etre dur
+    - Threefold Repetition // maybe a modifier
     - nombre de piece insufisant // peut etre dur
 - systeme de gameOver :
     - affichage de fin
 - promotion : 
     - pop up qui permet de choisir en quoi se transformer
-
+- bouton nouvelle game et bouton ff
 EGALITE :
 - Stalemate / fait
 - Dead Position / a faire
