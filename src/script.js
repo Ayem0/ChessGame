@@ -187,18 +187,33 @@ function getOppositeColor(color) {
     }
 }
 
+function isArrayEqual(boardType, boardType2) {
+    for (let i = 0; i < boardType.length; i++) {
+        const element = boardType[i];
+        const element2 = boardType2[i];
+        if (element != element2) {
+            return false;
+        }
+    }
+    return true;
+}
+
 function updateBoardInfo(whiteGrave, blackGrave) {
     let whiteCount = 0;
     let blackCount = 0;
+    const blackPlus = document.getElementById('black-plus').querySelector('span');
+    const whitePlus = document.getElementById('white-plus').querySelector('span');
     const elements = [
         'black-pawn-icon', 'black-bishop-icon', 'black-queen-icon', 'black-rook-icon', 'black-knight-icon',
         'white-pawn-icon', 'white-bishop-icon', 'white-queen-icon', 'white-rook-icon', 'white-knight-icon'
     ];
-    for ( let i = 0; i < elements.length; i++) {
+    blackPlus.textContent = '';
+    whitePlus.textContent = '';
+    for (let i = 0; i < elements.length; i++) {
         const div = document.getElementById(elements[i]);
         div.textContent = '';
     }
-    for ( let i = 0; i < whiteGrave.length; i++) {
+    for (let i = 0; i < whiteGrave.length; i++) {
         const img = document.createElement('img');
         let type = whiteGrave[i]['type'];
         (type.includes('pawn')) ? type = 'pawn' : null;
@@ -206,14 +221,13 @@ function updateBoardInfo(whiteGrave, blackGrave) {
         (type.includes('bishop')) ? type = 'bishop' : null;
         (type.includes('rook')) ? type = 'rook' : null;
         (type.includes('queen')) ? type = 'queen' : null;
-        // meme chose avec transforme type pawn si besoin
         img.src = whiteGrave[i]['img'];
         img.classList.add('hud-img');
         const div = document.getElementById('white-' + type + '-icon')
         div.appendChild(img);
         blackCount+= whiteGrave[i]['value'];
     }
-    for ( let i = 0; i < blackGrave.length; i++) {
+    for (let i = 0; i < blackGrave.length; i++) {
         const img = document.createElement('img');
         let type = blackGrave[i]['type'];
         (type.includes('pawn')) ? type = 'pawn' : null;
@@ -227,11 +241,7 @@ function updateBoardInfo(whiteGrave, blackGrave) {
         div.appendChild(img);
         whiteCount+= blackGrave[i]['value'];
     }
-    const blackPlus = document.getElementById('black-plus').querySelector('span');
-    blackPlus.textContent = '';
-    const whitePlus = document.getElementById('white-plus').querySelector('span');
-    whitePlus.textContent = '';
-    if ( whiteCount - blackCount != 0) {
+    if (whiteCount - blackCount != 0) {
         if ( whiteCount > blackCount) {
             whitePlus.textContent = '+ ' + (whiteCount - blackCount);
         } else {
@@ -296,16 +306,6 @@ function dragStart(event) {
     }
 }
 
-function isArrayEqual(boardType, boardType2) {
-    for (let i = 0; i < boardType.length; i++) {
-        const element = boardType[i];
-        const element2 = boardType2[i];
-        if (element != element2) {
-            return false;
-        }
-    }
-    return true;
-}
 function drop(event) {
     event.stopPropagation();
     if (!gameOver) {
@@ -350,14 +350,14 @@ function drop(event) {
                             gameOver = true;
                             console.log('50 moves rule')
                         }
-                        let nb = 0;
+                        let nb = 1;
                         if (boardHistory.length !== 0) {
                             const lastBoard = boardHistory[boardHistory.length - 1];
                             for (let i = 0; i < boardHistory.length - 1; i++) {
                                 const element = boardHistory[i];
                                 if (isArrayEqual(lastBoard, element)) {
                                     nb++;
-                                    if (nb === 2) {
+                                    if (nb === 3) {
                                         console.log('Threefold Repetition');
                                         gameOver = true;
                                         break;
@@ -369,7 +369,6 @@ function drop(event) {
                     }
                     turn = getOppositeColor(turn);
                     break;
-
                 }
             }
         }
@@ -395,36 +394,18 @@ function movePiece(boardType, endPos, startPos) {
     (piece['type'] === 'rook-right' && piece['color'] === 'black') ? (bCastleRight = false) : null;
     (piece['type'] === 'rook-left' && piece['color'] === 'black') ? (bCastleLeft = false) : null;
     // si castle, bouge la tour
-    if (piece['type'].includes('king') && endingPos == startingPos + 2) {
-        const rook = boardType[startingPos + 3];
-        boardType[startingPos + 3] = '';
-        boardType[startingPos + 1] = rook;
-        let rookMoving = document.getElementById(startingPos + 3);
-        if (rookMoving.firstChild) {
-            var children = rookMoving.childNodes;
-            for (var i = children.length - 1; i >= 0; i--) {
-                if (children[i].nodeName !== 'P') {
-                    rookMoving = children[i];
-                }
-            }
+    if (piece['type'].includes('king') && (endingPos == startingPos + 2 || endingPos == startingPos - 2)) {
+        let direction = [];
+        if ( endingPos == startingPos + 2) {
+            direction.push(3, 1);
+        } else {
+            direction.push(-4, -1);
         }
-        const rookEnd = document.getElementById(startingPos + 1);
-        rookEnd.appendChild(rookMoving);
-    }
-    if (piece['type'].includes('king') && endingPos == startingPos - 2) {
-        const rook = boardType[startingPos - 4];
-        boardType[startingPos - 4] = '';
-        boardType[startingPos - 1] = rook;
-        let rookMoving = document.getElementById(startingPos - 4);
-        if (rookMoving.firstChild) {
-            var children = rookMoving.childNodes;
-            for (var i = children.length - 1; i >= 0; i--) {
-                if (children[i].nodeName !== 'P') {
-                    rookMoving = children[i];
-                }
-            }
-        }
-        const rookEnd = document.getElementById(startingPos - 1);
+        const rook = boardType[startingPos + direction[0]];
+        boardType[startingPos + direction[0]] = '';
+        boardType[startingPos + direction[1]] = rook;
+        const rookMoving = document.getElementById(startingPos + direction[0]).querySelector('div');
+        const rookEnd = document.getElementById(startingPos + direction[1]);
         rookEnd.appendChild(rookMoving);
     }
     // ajoute les pieces mortes dans les tableaux
@@ -440,85 +421,43 @@ function movePiece(boardType, endPos, startPos) {
     boardType[endingPos] = piece;
     console.log(boardType);
     // supprime la piece si existe et bouge la piece dans le board affiché
-    let pieceMoving = document.getElementById(startingPos);
-    let tileSelected = document.getElementById(endingPos);
-    if (pieceMoving.firstChild) {
-        var children = pieceMoving.childNodes;
-        for (var i = children.length - 1; i >= 0; i--) {
-            if (children[i].nodeName !== 'P') {
-                pieceMoving = children[i];
-            }
-        }
+    const pieceMoving = document.getElementById(startingPos).querySelector('div');
+    const tileSelected = document.getElementById(endingPos);
+    if (tileSelected.querySelector('div')) {
+        tileSelected.removeChild(tileSelected.querySelector('div'));
     }
-    if (tileSelected.firstChild) {
-        var children = tileSelected.childNodes;
-        for (var i = children.length - 1; i >= 0; i--) {
-            if (children[i].nodeName !== 'P') {
-                tileSelected.removeChild(children[i]);
-            }
-        }
-    } 
     tileSelected.appendChild(pieceMoving);
     // PROMOTION DE PION // A MODIFIER AVEC UN POPUP ET TRANSFORMER EN FONCTION DU POP UP // en attendant la selection empecher les mouvements 
     if ( piece['type'].includes('pawn') && (endingPos >= 0 && endingPos < 8 || endingPos <= 63 && endingPos > 55)) {
-        if (tileSelected.firstChild) {
-            var children = tileSelected.childNodes;
-            for (var i = children.length - 1; i >= 0; i--) {
-                if (children[i].nodeName !== 'P') {
-                   children[i].className = "";
-                    if ( piece['color'] == 'white') {
-                        children[i].classList.add('queen-transformed', 'white', 'piece');
-                        children[i].firstChild.src = wQImg;
-                        boardType[endingPos] = {...wQ};
-                    } else {
-                        children[i].classList.add('queen-transformed', 'black', 'piece');
-                        children[i].firstChild.src = bQImg;
-                        boardType[endingPos] = {...bQ};
-                    }
-                }
-            }
+        const pawnMoving = tileSelected.querySelector('div');
+        pawnMoving.className = '';
+        if ( piece['color'] == 'white') {
+            pawnMoving.classList.add('queen-transformed', 'white', 'piece');
+            pawnMoving.firstChild.src = wQImg;
+            boardType[endingPos] = {...wQ};
+        } else {
+            pawnMoving.classList.add('queen-transformed', 'black', 'piece');
+            pawnMoving.firstChild.src = bQImg;
+            boardType[endingPos] = {...bQ};
         }
     }
     // EN PASSANT
     // si en passant supprime la piece started en passant
     const started = getStartedEP(boardType);
-    if (piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == started - 8) {
-        blackDeadPieces.push(boardType[started]); 
-        console.log(blackDeadPieces);
+    if (piece['type'].includes('pawn') && (piece['color'] == 'white' && endingPos == started - 8 || piece['color'] == 'black' && endingPos == started + 8 )) {
+        if ( piece['color'] == 'white') {
+            whiteDeadPieces.push(boardType[started]); 
+        } else {
+            blackDeadPieces.push(boardType[started]); 
+        }
         boardType[started] = '';
-        let deadStartedEP = document.getElementById(started);
-        if (deadStartedEP.firstChild) {
-            var children = deadStartedEP.childNodes;
-            for (var i = children.length - 1; i >= 0; i--) {
-                if (children[i].nodeName !== 'P') {
-                    deadStartedEP.removeChild(children[i]);
-                }
-            }
-            
-        }
-    }
-    if (piece['type'].includes('pawn') && piece['color'] == 'black' && endingPos == started + 8) {
-        whiteDeadPieces.push(boardType[started]); 
-        console.log(whiteDeadPieces);
-        boardType[started] = ''; 
-        let deadStartedEP = document.getElementById(started);
-        if (deadStartedEP.firstChild) {
-            // ajouter un update des info black ou white
-            var children = deadStartedEP.childNodes;
-            for (var i = children.length - 1; i >= 0; i--) {
-                if (children[i].nodeName !== 'P') {
-                    deadStartedEP.removeChild(children[i]);
-                }
-            }
-        }
+        const deadStartedEP = document.getElementById(started);
+        deadStartedEP.removeChild(deadStartedEP.querySelector('div'));
     }
     // reset en passant ici
     resetEnPassant(boardType);
-    // si en started en passant mets started en passant a true
-    if (piece['type'].includes('pawn') && piece['color'] == 'black' && endingPos == startingPos + 16) {
-        boardType[endingPos]['startedEP'] = true;
-    }
-    if (piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == startingPos - 16) {
+    // si en passant mets started en passant a true
+    if (piece['type'].includes('pawn') && (endingPos == startingPos + 16 || endingPos == startingPos - 16 )) {
         boardType[endingPos]['startedEP'] = true;
     }
 }
@@ -529,7 +468,6 @@ function createTurn(boardType, endPos, startPos) {
     const piece = boardType[startingPos];
     const history = document.getElementById('history');
     const newDiv = document.createElement('div');
-    
     newDiv.classList.add('padding-left');
     const span = document.createElement('span');
     let div;
@@ -679,9 +617,7 @@ function createTurn(boardType, endPos, startPos) {
     boardHistory.push(boardType);
     const boardIndex = boardHistory.length-1;
     newDiv.onclick= () => {
-        
         createBoard(boardHistory[boardIndex]);
-        
     }
 }
 
@@ -699,10 +635,8 @@ function pawnMoves(startId, color, boardType) {
     const startingRank = color === 'white' ? [6,7] : [1,2];
     const indexStartedEP = getStartedEP(boardType);
     // 2 case vers le haut ou bas
-    if (startPos / 8 < startingRank[1] && startPos / 8 >= startingRank[0]) {
-        if (boardType[startPos + 8 * moveDirection] == '' && boardType[startPos + 16 * moveDirection] == '') {
-            possibleMoves.push(startPos + 16 * moveDirection);
-        }
+    if (startPos / 8 < startingRank[1] && startPos / 8 >= startingRank[0] && boardType[startPos + 8 * moveDirection] == '' && boardType[startPos + 16 * moveDirection] == '') {
+        possibleMoves.push(startPos + 16 * moveDirection);
     }
     // 1 case vers le haut ou bas
     if (boardType[startPos + 8 * moveDirection] == '') {
@@ -714,29 +648,21 @@ function pawnMoves(startId, color, boardType) {
     }
     if ( color == 'white') {
         // 1 case en diagonale droite blanc
-        if (startPos % 8 < 7 && startPos / 8 >= 1) {
-            if (boardType[startPos + 7 * moveDirection] != '' && boardType[startPos + 7 * moveDirection]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 7 * moveDirection);
-            }
+        if (startPos % 8 < 7 && startPos / 8 >= 1 && boardType[startPos + 7 * moveDirection] != '' && boardType[startPos + 7 * moveDirection]['color'] == oppositeColor) {
+            possibleMoves.push(startPos + 7 * moveDirection);
         }
         // 1 case en diagonale gauche blanc
-        if (startPos % 8 > 0 && startPos / 8 >= 1) {
-            if (boardType[startPos + 9 * moveDirection] != '' && boardType[startPos + 9 * moveDirection]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 9 * moveDirection);
-            }
+        if (startPos % 8 > 0 && startPos / 8 >= 1 && boardType[startPos + 9 * moveDirection] != '' && boardType[startPos + 9 * moveDirection]['color'] == oppositeColor) {
+            possibleMoves.push(startPos + 9 * moveDirection);
         }
     } else {
         // 1 case en diagonale droite noir
-        if (startPos % 8 < 7 && startPos / 8 < 7) {
-            if (boardType[startPos + 9 * moveDirection] != '' && boardType[startPos + 9 * moveDirection]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 9 * moveDirection);
-            }
+        if (startPos % 8 < 7 && startPos / 8 < 7 && boardType[startPos + 9 * moveDirection] != '' && boardType[startPos + 9 * moveDirection]['color'] == oppositeColor) {
+            possibleMoves.push(startPos + 9 * moveDirection);
         }
         // 1 case en diagonale gauche noir
-        if (startPos % 8 > 0 && startPos / 8 < 7) {
-            if (boardType[startPos + 7 * moveDirection] != '' && boardType[startPos + 7 * moveDirection]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 7 * moveDirection);
-            }
+        if (startPos % 8 > 0 && startPos / 8 < 7 && boardType[startPos + 7 * moveDirection] != '' && boardType[startPos + 7 * moveDirection]['color'] == oppositeColor) {
+            possibleMoves.push(startPos + 7 * moveDirection);
         }
     }
     return possibleMoves;
@@ -830,16 +756,13 @@ function bishopMoves(startId, color, boardType) {
         let count = 0;
         for (let i = startPos % 8; i > 0; i--) {
             count++;
-            if (startPos - 9 * count < 0) {
-                break;
-            }
-            if (boardType[startPos - 9 * count] != '') {
-                if (boardType[startPos - 9 * count]['color'] == oppositeColor) {
-                    possibleMoves.push(startPos - 9 * count);
-                }
+            if (startPos - 9 * count < 0 || boardType[startPos - 9 * count] != '' && boardType[startPos - 9 * count]['color'] != oppositeColor) {
                 break;
             } else {
                 possibleMoves.push(startPos - 9 * count);
+                if (boardType[startPos - 9 * count] != '') {
+                    break;
+                }
             }
         }
     }
@@ -848,16 +771,13 @@ function bishopMoves(startId, color, boardType) {
         let count = 0;
         for (let i = startPos % 8; i < 7; i++) {
             count++;
-            if (startPos - 7 * count < 0) {
-                break;
-            }
-            if (boardType[startPos - 7 * count] != '') {
-                if (boardType[startPos - 7 * count]['color'] == oppositeColor) {
-                    possibleMoves.push(startPos - 7 * count);
-                }
+            if (startPos - 7 * count < 0 || boardType[startPos - 7 * count] != '' && boardType[startPos - 7 * count]['color'] != oppositeColor) {
                 break;
             } else {
                 possibleMoves.push(startPos - 7 * count);
+                if (boardType[startPos - 7 * count] != '') {
+                    break;
+                }
             }
         }
     }
@@ -866,16 +786,13 @@ function bishopMoves(startId, color, boardType) {
         let count = 0;
         for (let i = startPos % 8; i < 7; i++) {
             count++;
-            if (startPos + 9 * count > 63) {
-                break;
-            }
-            if (boardType[startPos + 9 * count] != '') {
-                if (boardType[startPos + 9 * count]['color'] == oppositeColor) {
-                    possibleMoves.push(startPos + 9 * count);
-                }
+            if (startPos + 9 * count > 63 || boardType[startPos + 9 * count] != '' && boardType[startPos + 9 * count]['color'] != oppositeColor) {
                 break;
             } else {
                 possibleMoves.push(startPos + 9 * count);
+                if (boardType[startPos + 9 * count] != '') {
+                    break;
+                }
             }
         }
     }
@@ -884,16 +801,13 @@ function bishopMoves(startId, color, boardType) {
         let count = 0;
         for (let i = startPos % 8; i > 0; i--) {
             count++;
-            if (startPos + 7 * count > 63) {
-                break;
-            }
-            if (boardType[startPos + 7 * count] != '') {
-                if (boardType[startPos + 7 * count]['color'] == oppositeColor) {
-                    possibleMoves.push(startPos + 7 * count);       
-                }
+            if (startPos + 7 * count > 63 || boardType[startPos + 7 * count] != '' && boardType[startPos + 7 * count]['color'] != oppositeColor) {
                 break;
             } else {
                 possibleMoves.push(startPos + 7 * count);
+                if (boardType[startPos + 7 * count] != '') {
+                    break;
+                }
             }
         }
     }
@@ -910,93 +824,37 @@ function knightMoves(startId, color, boardType) {
     const startPos = parseInt(startId);
     const oppositeColor = getOppositeColor(color);
     const possibleMoves = [];
-    // deplacement de 2 case vers le haut 1 case vers la droite
-    if (startPos / 8 >= 2 && startPos % 8 < 7) {
-        if (boardType[startPos - 15] != '') {
-            if (boardType[startPos - 15]['color'] == oppositeColor) {
-                possibleMoves.push(startPos - 15);
-            }
-        }
-        else {
-            possibleMoves.push(startPos - 15);
-        }
+    // 2 case vers le haut
+    if (startPos / 8 >= 2 && startPos % 8 < 7 && (boardType[startPos - 15]['color'] == oppositeColor || boardType[startPos - 15] == '')) {
+        possibleMoves.push(startPos - 15);
     }
-    // deplacement de 2 case vers le haut 1 case vers la gauche
-    if (startPos / 8 >= 2 && startPos % 8 > 0) {
-        if (boardType[startPos - 17] != '') {
-            if (boardType[startPos - 17]['color'] == oppositeColor) {
-                possibleMoves.push(startPos - 17);
-            }
-        }
-        else {
-            possibleMoves.push(startPos - 17);
-        }
+    // 2 case vers le haut
+    if (startPos / 8 >= 2 && startPos % 8 > 0 && (boardType[startPos - 17]['color'] == oppositeColor || boardType[startPos - 17] == '')) {
+        possibleMoves.push(startPos - 17);
     }
-    // deplacement de 2 case vers le bas 1 case vers la gauche
-    if (startPos / 8 < 6 && startPos % 8 > 0) {
-        if (boardType[startPos + 15] != '') {
-            if (boardType[startPos + 15]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 15);
-            }
-        }
-        else {
-            possibleMoves.push(startPos + 15);
-        }
+    // 2 case vers le bas 
+    if (startPos / 8 < 6 && startPos % 8 > 0 && (boardType[startPos + 15]['color'] == oppositeColor || boardType[startPos + 15] == '')) {
+        possibleMoves.push(startPos + 15);
     }
-    // deplacement de 2 case vers le bas 1 case vers la droite
-    if (startPos / 8 < 6 && startPos % 8 < 7) {
-        if (boardType[startPos + 17] != '') {
-            if (boardType[startPos + 17]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 17);
-            }
-        }
-        else {
-            possibleMoves.push(startPos + 17);
-        }
+    // 2 case vers le haut
+    if (startPos / 8 < 6 && startPos % 8 < 7 && (boardType[startPos + 17]['color'] == oppositeColor || boardType[startPos + 17] == '')) {
+        possibleMoves.push(startPos + 17);
     }
-    // deplacement de 2 cases a droite 1 case vers le haut
-    if (startPos / 8 >= 1 && startPos % 8 < 6) {
-        if (boardType[startPos - 6] != '') {
-            if (boardType[startPos - 6]['color'] == oppositeColor) {
-                possibleMoves.push(startPos - 6);
-            }
-        }
-        else {
-            possibleMoves.push(startPos - 6);
-        }
+    // 1 case vers le haut
+    if (startPos / 8 >= 1 && startPos % 8 < 6 && (boardType[startPos - 6]['color'] == oppositeColor || boardType[startPos - 6] == '')) {
+        possibleMoves.push(startPos - 6);
     }
-    // deplacement de 2 case vers la droite 1 case vers le bas
-    if (startPos / 8 < 7 && startPos % 8 < 6) {
-        if (boardType[startPos + 10] != '') {
-            if (boardType[startPos + 10]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 10);
-            }
-        }
-        else {
-            possibleMoves.push(startPos + 10);
-        }
+    // 2 case vers le haut
+    if (startPos / 8 >= 1 && startPos % 8 > 1 && (boardType[startPos - 10]['color'] == oppositeColor || boardType[startPos - 10] == '')) {
+        possibleMoves.push(startPos - 10);
     }
-    // deplacement de 2 case vers la gauche 1 case vers le bas
-    if (startPos / 8 < 7 && startPos % 8 > 1) {
-        if (boardType[startPos + 6] != '') {
-            if (boardType[startPos + 6]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 6);
-            }
-        }
-        else {
-            possibleMoves.push(startPos + 6);
-        }
+    // 1 case vers le bas
+    if (startPos / 8 < 7 && startPos % 8 < 6 && (boardType[startPos + 10]['color'] == oppositeColor || boardType[startPos + 10] == '')) {
+        possibleMoves.push(startPos + 10);
     }
-    // deplacement de 2 case vers la gauche 1 case vers le haut
-    if (startPos / 8 >= 1 && startPos % 8 > 1) {
-        if (boardType[startPos - 10] != '') {
-            if (boardType[startPos - 10]['color'] == oppositeColor) {
-                possibleMoves.push(startPos - 10);
-            }
-        }
-        else {
-            possibleMoves.push(startPos - 10);
-        }
+    // 2 case vers le haut
+    if (startPos / 8 < 7 && startPos % 8 > 1 && (boardType[startPos + 6]['color'] == oppositeColor || boardType[startPos + 6] == '')) {
+        possibleMoves.push(startPos + 6);
     }
     return possibleMoves;
 }
@@ -1014,107 +872,53 @@ function kingMoves(startId, color, boardType) {
     // castle 
     // droite
     if (boardType[startPos + 1] == '' && boardType[startPos + 2] == '' && boardType[startPos + 3]['type'] == 'rook-right' && boardType[startPos + 3]['color'] == color) {
-        if ( color == 'white') {
-            if ( wCastleRight) {
-                possibleMoves.push(startPos + 2);
-            }
-        } else {
-            if ( bCastleRight) {
-                possibleMoves.push(startPos + 2);
-            }
+        if ( color == 'white' && wCastleRight) {
+            possibleMoves.push(startPos + 2);
+        }
+        if ( color == 'black' && bCastleRight) {
+            possibleMoves.push(startPos + 2);
         }
     }
     // gauche
     if (boardType[startPos - 1] == '' && boardType[startPos - 2] == '' && boardType[startPos - 3] == '' && boardType[startPos - 4]['type'] == 'rook-left' && boardType[startPos - 4]['color'] == color) {
-        if ( color == 'white') {
-            if ( wCastleLeft) {
-                possibleMoves.push(startPos - 2);
-            }
-        } else {
-            if ( bCastleLeft) {
-                possibleMoves.push(startPos - 2);
-            }
+        if ( color == 'white' && wCastleLeft) {
+            possibleMoves.push(startPos - 2);
+        }
+        if ( color == 'black' && bCastleLeft) {
+            possibleMoves.push(startPos - 2);
         }
     }
     // calcule de la case du bas
-    if (startPos / 8 < 7) {
-        if (boardType[startPos + 8] != '') {
-            if (boardType[startPos + 8]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 8);
-            }
-        } else {
-            possibleMoves.push(startPos + 8);
-        }
+    if (startPos / 8 < 7 && (boardType[startPos + 8]['color'] == oppositeColor || boardType[startPos + 8] == '')) {
+        possibleMoves.push(startPos + 8);
     }
     // calcule de la case du haut
-    if (startPos / 8 >= 1) {
-        if (boardType[startPos - 8] != '') {
-            if (boardType[startPos - 8]['color'] == oppositeColor) {
-                possibleMoves.push(startPos - 8);
-            }
-        } else {
-            possibleMoves.push(startPos - 8);
-        }
+    if (startPos / 8 >= 1 && (boardType[startPos - 8]['color'] == oppositeColor || boardType[startPos - 8] == '')) {
+        possibleMoves.push(startPos - 8);
     }
     // calcule de la case de droite
-    if (startPos % 8 < 7) {
-        if (boardType[startPos + 1] != '') {
-            if (boardType[startPos + 1]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 1);
-            }
-        } else {
-            possibleMoves.push(startPos + 1);
-        }
+    if (startPos % 8 < 7 && (boardType[startPos + 1]['color'] == oppositeColor || boardType[startPos + 1] == '')) {
+        possibleMoves.push(startPos + 1);
     }
     // calcule de la case de gauche
-    if (startPos % 8 > 0) {
-        if (boardType[startPos - 1] != '') {
-            if (boardType[startPos - 1]['color'] == oppositeColor) {
-                possibleMoves.push(startPos - 1);
-            }
-        } else {
-            possibleMoves.push(startPos - 1);
-        }
+    if (startPos % 8 > 0 && (boardType[startPos - 1]['color'] == oppositeColor || boardType[startPos - 1] == '')) {
+        possibleMoves.push(startPos - 1);
     }
     // calcule de la case en haut a droite
-    if (startPos % 8 < 7 && startPos / 8 >= 1) {
-        if (boardType[startPos - 7] != '') {
-            if (boardType[startPos - 7]['color'] == oppositeColor) {
-                possibleMoves.push(startPos - 7);
-            }
-        } else {
-            possibleMoves.push(startPos - 7);
-        }
+    if (startPos / 8 >= 1 && startPos % 8 < 7 && (boardType[startPos - 7]['color'] == oppositeColor || boardType[startPos - 7] == '')) {
+        possibleMoves.push(startPos - 7);
     }
     // calcule de la case en haut a gauche
-    if (startPos % 8 > 0 && startPos / 8 >= 1) {
-        if (boardType[startPos - 9] != '') {
-            if (boardType[startPos - 9]['color'] == oppositeColor) {
-                possibleMoves.push(startPos - 9);
-            }
-        } else {
-            possibleMoves.push(startPos - 9);
-        }
+    if (startPos / 8 >= 1 && startPos % 8 > 0 && (boardType[startPos - 9]['color'] == oppositeColor || boardType[startPos - 9] == '')) {
+        possibleMoves.push(startPos - 9);
     }
     // calcule de la case en bas a droite
-    if (startPos % 8 < 7 && startPos / 8 < 7) {
-        if (boardType[startPos + 9] != '') {
-            if (boardType[startPos + 9]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 9);
-            }
-        } else {
-            possibleMoves.push(startPos + 9);
-        }
+    if (startPos / 8 < 7 && startPos % 8 < 7 && (boardType[startPos + 9]['color'] == oppositeColor || boardType[startPos + 9] == '')) {
+        possibleMoves.push(startPos + 9);
     }
     // calcule de la case en bas a gauche
-    if (startPos % 8 > 0 && startPos / 8 < 7) {
-        if (boardType[startPos + 7] != '') {
-            if (boardType[startPos + 7]['color'] == oppositeColor) {
-                possibleMoves.push(startPos + 7);
-            }
-        } else {
-            possibleMoves.push(startPos + 7);
-        }
+    if (startPos / 8 < 7 && startPos % 8 > 0 && (boardType[startPos + 7]['color'] == oppositeColor || boardType[startPos + 7] == '')) {
+        possibleMoves.push(startPos + 7);
     }
     return possibleMoves;
 }
@@ -1134,61 +938,35 @@ function isMoveLegal(startPos, endPos, boardType) {
     const piece = boardCopy[startingPos];
     const pieceColor = piece['color'];
     // SI CASTLE
-    if ( piece['type'].includes('king') && endingPos == startingPos - 2) {
-        if ( isCheck(pieceColor, boardCopy)) {
-            return false;
+    if ( piece['type'].includes('king') && (endingPos == startingPos - 2 || endingPos == startingPos + 2 )) {
+        let direction = [];
+        if ( endingPos == startingPos + 2 ) {
+            direction.push(1, 2, 3);
         } else {
-            boardCopy[startingPos] = '';
-            boardCopy[startingPos - 1] = piece;
-            if ( isCheck(pieceColor, boardCopy)) {
-                return false;
-            } else {
-                boardCopy[startingPos - 1] = '';
-                boardCopy[startingPos - 2] = piece;
-                const rook = boardCopy[startingPos - 4];
-                boardCopy[startingPos - 4] = '';
-                boardCopy[startingPos - 1] = rook;
-                if ( isCheck(pieceColor, boardCopy)) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }  
+            direction.push(-1, -2, -4);
         }
-    }
-    if ( piece['type'].includes('king') && endingPos == startingPos + 2) {
         if ( isCheck(pieceColor, boardCopy)) {
             return false;
         } else {
             boardCopy[startingPos] = '';
-            boardCopy[startingPos + 1] = piece;
+            boardCopy[startingPos + direction[0]] = piece;
             if ( isCheck(pieceColor, boardCopy)) {
                 return false;
             } else {
-                boardCopy[startingPos + 1] = '';
-                boardCopy[startingPos + 2] = piece;
-                const rook = boardCopy[startingPos + 3];
-                boardCopy[startingPos + 3] = '';
-                boardCopy[startingPos + 1] = rook;
-                if ( isCheck(pieceColor, boardCopy)) {
-                    return false;
-                } else {
-                    return true;
-                }
+                boardCopy[startingPos + direction[0]] = '';
+                boardCopy[startingPos + direction[1]] = piece;
+                const rook = boardCopy[startingPos + direction[2]];
+                boardCopy[startingPos + direction[2]] = '';
+                boardCopy[startingPos + direction[0]] = rook;
+                // maybe a modif si doit ne pas etre en echec avant le mouv de la tour
             }  
         }
     }
     // SI EN PASSANT 
-    if ( piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == startingPos - 9 && boardCopy[endingPos] == '') {
+    if (piece['type'].includes('pawn') && pieceColor == 'white' && boardCopy[endingPos] == '' && (endingPos == startingPos - 9 || endingPos == startingPos - 7)) {
         boardCopy[endingPos + 8] = '';
     }
-    if ( piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == startingPos - 7 && boardCopy[endingPos] == '') {
-        boardCopy[endingPos + 8] = '';
-    }
-    if ( piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == startingPos + 9 && boardCopy[endingPos] == '') {
-        boardCopy[endingPos - 8] = '';
-    }
-    if ( piece['type'].includes('pawn') && piece['color'] == 'white' && endingPos == startingPos + 7 && boardCopy[endingPos] == '') {
+    if (piece['type'].includes('pawn') && pieceColor == 'black' && boardCopy[endingPos] == '' && (endingPos == startingPos + 9 || endingPos == startingPos + 7)) {
         boardCopy[endingPos - 8] = '';
     }
     // fais le déplacement
@@ -1213,33 +991,28 @@ function isCheck(color, boardType) {
     let kingPos;
     // parcours le board copy
     for (let i = 0; i < boardType.length; i++) {
-        if (boardType[i] != '') {
-            if (boardType[i]['color'] == oppositeColor) {
-                if (boardType[i]['type'].includes('pawn')) {
-                    ennemyAccessiblePos = ennemyAccessiblePos.concat(pawnMoves(i, oppositeColor, boardType));
-                }
-                if (boardType[i]['type'].includes('bishop')) {
-                    ennemyAccessiblePos = ennemyAccessiblePos.concat(bishopMoves(i, oppositeColor, boardType));
-                }
-                if (boardType[i]['type'].includes('rook')) {
-                    ennemyAccessiblePos = ennemyAccessiblePos.concat(rookMoves(i, oppositeColor, boardType));
-                }
-                if (boardType[i]['type'].includes('knight')) {
-                    ennemyAccessiblePos = ennemyAccessiblePos.concat(knightMoves(i, oppositeColor, boardType));
-                }
-                if (boardType[i]['type'].includes('queen')) {
-                    ennemyAccessiblePos = ennemyAccessiblePos.concat(rookMoves(i, oppositeColor, boardType));
-                    ennemyAccessiblePos = ennemyAccessiblePos.concat(bishopMoves(i, oppositeColor, boardType));
-                }
-                if (boardType[i]['type'].includes('king')) {
-                    ennemyAccessiblePos = ennemyAccessiblePos.concat(kingMoves(i, oppositeColor, boardType));
-                }
+        if (boardType[i] != '' && boardType[i]['color'] == oppositeColor) {
+            if (boardType[i]['type'].includes('pawn')) {
+                ennemyAccessiblePos = ennemyAccessiblePos.concat(pawnMoves(i, oppositeColor, boardType));
             }
-            if (boardType[i]['color'] == color) {
-                if (boardType[i]['type'].includes('king')) {
-                    kingPos = i;
-                }
+            if (boardType[i]['type'].includes('bishop')) {
+                ennemyAccessiblePos = ennemyAccessiblePos.concat(bishopMoves(i, oppositeColor, boardType));
             }
+            if (boardType[i]['type'].includes('rook')) {
+                ennemyAccessiblePos = ennemyAccessiblePos.concat(rookMoves(i, oppositeColor, boardType));
+            }
+            if (boardType[i]['type'].includes('knight')) {
+                ennemyAccessiblePos = ennemyAccessiblePos.concat(knightMoves(i, oppositeColor, boardType));
+            }
+            if (boardType[i]['type'].includes('queen')) {
+                ennemyAccessiblePos = ennemyAccessiblePos.concat(rookMoves(i, oppositeColor, boardType),bishopMoves(i, oppositeColor, boardType));
+            }
+            if (boardType[i]['type'].includes('king')) {
+                ennemyAccessiblePos = ennemyAccessiblePos.concat(kingMoves(i, oppositeColor, boardType));
+            }   
+        }
+        if (boardType[i] != '' && boardType[i]['color'] == color && boardType[i]['type'].includes('king')) {
+            kingPos = i;
         }
     }
     if (ennemyAccessiblePos.includes(kingPos)) {
@@ -1253,54 +1026,52 @@ function isCheckMate(color, boardType) {
     const colorAccessiblePos = [];
     // parcours le board copy
     for (let i = 0; i < boardType.length; i++) {
-        if (boardType[i] != '') {
-            if (boardType[i]['color'] == color) {
-                if (boardType[i]['type'].includes('pawn')) {
-                    const pawnPossibleMoves = pawnMoves(i, color, boardType);
-                    for (let j = 0; j < pawnPossibleMoves.length; j++) {
-                        if (isMoveLegal(i, pawnPossibleMoves[j], boardType)) {
-                            colorAccessiblePos.push(pawnPossibleMoves[j]);
-                        }
+        if (boardType[i] != '' && boardType[i]['color'] == color) {
+            if (boardType[i]['type'].includes('pawn')) {
+                const pawnPossibleMoves = pawnMoves(i, color, boardType);
+                for (let j = 0; j < pawnPossibleMoves.length; j++) {
+                    if (isMoveLegal(i, pawnPossibleMoves[j], boardType)) {
+                        colorAccessiblePos.push(pawnPossibleMoves[j]);
                     }
                 }
-                if (boardType[i]['type'].includes('bishop')) {
-                    const bishopPossibleMoves = bishopMoves(i, color, boardType);
-                    for (let j = 0; j < bishopPossibleMoves.length; j++) {
-                        if (isMoveLegal(i, bishopPossibleMoves[j], boardType)) {
-                            colorAccessiblePos.push(bishopPossibleMoves[j]);
-                        }
+            }
+            if (boardType[i]['type'].includes('bishop')) {
+                const bishopPossibleMoves = bishopMoves(i, color, boardType);
+                for (let j = 0; j < bishopPossibleMoves.length; j++) {
+                    if (isMoveLegal(i, bishopPossibleMoves[j], boardType)) {
+                        colorAccessiblePos.push(bishopPossibleMoves[j]);
                     }
                 }
-                if (boardType[i]['type'].includes('rook')) {
-                    const rookPossibleMoves = rookMoves(i, color, boardType);
-                    for (let j = 0; j < rookPossibleMoves.length; j++) {
-                        if (isMoveLegal(i, rookPossibleMoves[j], boardType)) {
-                            colorAccessiblePos.push(rookPossibleMoves[j]);
-                        }
+            }
+            if (boardType[i]['type'].includes('rook')) {
+                const rookPossibleMoves = rookMoves(i, color, boardType);
+                for (let j = 0; j < rookPossibleMoves.length; j++) {
+                    if (isMoveLegal(i, rookPossibleMoves[j], boardType)) {
+                        colorAccessiblePos.push(rookPossibleMoves[j]);
                     }
                 }
-                if (boardType[i]['type'].includes('knight')) {
-                    const knightPossibleMoves = knightMoves(i, color, boardType);
-                    for (let j = 0; j < knightPossibleMoves.length; j++) {
-                        if (isMoveLegal(i, knightPossibleMoves[j], boardType)) {
-                            colorAccessiblePos.push(knightPossibleMoves[j]);
-                        }
+            }
+            if (boardType[i]['type'].includes('knight')) {
+                const knightPossibleMoves = knightMoves(i, color, boardType);
+                for (let j = 0; j < knightPossibleMoves.length; j++) {
+                    if (isMoveLegal(i, knightPossibleMoves[j], boardType)) {
+                        colorAccessiblePos.push(knightPossibleMoves[j]);
                     }
                 }
-                if (boardType[i]['type'].includes('queen')) {
-                    let queenPossibleMoves = rookMoves(i, color, boardType).concat(bishopMoves(i, color, boardType));
-                    for (let j = 0; j < queenPossibleMoves.length; j++) {
-                        if (isMoveLegal(i, queenPossibleMoves[j], boardType)) {
-                            colorAccessiblePos.push(queenPossibleMoves[j]);
-                        }
+            }
+            if (boardType[i]['type'].includes('queen')) {
+                let queenPossibleMoves = rookMoves(i, color, boardType).concat(bishopMoves(i, color, boardType));
+                for (let j = 0; j < queenPossibleMoves.length; j++) {
+                    if (isMoveLegal(i, queenPossibleMoves[j], boardType)) {
+                        colorAccessiblePos.push(queenPossibleMoves[j]);
                     }
                 }
-                if (boardType[i]['type'].includes('king')) {
-                    const kingPossibleMoves = kingMoves(i, color, boardType);
-                    for (let j = 0; j < kingPossibleMoves.length; j++) {
-                        if (isMoveLegal(i, kingPossibleMoves[j], boardType)) {
-                            colorAccessiblePos.push(kingPossibleMoves[j]);
-                        }
+            }
+            if (boardType[i]['type'].includes('king')) {
+                const kingPossibleMoves = kingMoves(i, color, boardType);
+                for (let j = 0; j < kingPossibleMoves.length; j++) {
+                    if (isMoveLegal(i, kingPossibleMoves[j], boardType)) {
+                        colorAccessiblePos.push(kingPossibleMoves[j]);
                     }
                 }
             }
