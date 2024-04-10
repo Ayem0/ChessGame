@@ -61,10 +61,9 @@ const defaultBoard = [
     { ...wP }, { ...wP }, { ...wP }, { ...wP }, { ...wP }, { ...wP }, { ...wP }, { ...wP },
     { ...wRLeft }, { ...wN }, { ...wB }, { ...wQ }, { ...wK }, { ...wB }, { ...wN }, { ...wRRight },
 ];
-var board = [...defaultBoard];
 /*
 // test echec et maths
-var defaultBoard = [
+const defaultBoard = [
     { ...bRLeft }, '', '', '', '', { ...bRRight }, { ...bK }, '',
     { ...bP }, { ...bP }, { ...bP }, '', '', { ...bP }, '', { ...bP },
     '', '', '', '', '', { ...wB }, { ...bP }, '',
@@ -74,18 +73,30 @@ var defaultBoard = [
     { ...wP }, '', '', '', '', { ...wP }, { ...wP }, { ...wP },
     '', '', '', '', '', { ...wRRight }, { ...wK }, '',
 ];
-// test draw
-var defaultBoard = [
+// test materiel insuffisant
+const defaultBoard = [
     { ...bK}, '', '', '', '', '', '', '',
     '', '', '', '', '', '', '', '',
     '', '', '', '', '', '', '', '',
-    '', '', { ...wQ}, '', { ...wK}, '', '', '',
+    '', '', '', '', { ...wK}, '', '', '',
+    '', { ...bB}, { ...wB}, '', '', '', '', '',
+    '', '', '', '', '', '', '', '',
+    '', '', '', '', '', '', '', '',
+    '', '', '', '', '', '', '', '',
+];
+// test draw
+const defaultBoard = [
+    { ...bK}, '', '', '', '', '', '', '',
+    '', '', '', '', '', '', '', '',
+    '', '', '', '', '', '', '', '',
+    '', { ...wQ}, '', '', { ...wK}, '', '', '',
     '', '', '', '', '', '', '', '',
     '', '', '', '', '', '', '', '',
     '', '', '', '', '', '', '', '',
     '', '', '', '', '', '', '', '',
 ];
 */
+var board = [...defaultBoard];
 // le tour actuel
 var turn = 'white';
 // Les pieces mortes
@@ -131,7 +142,6 @@ function createBoard(boardType) {
                     divPiece.setAttribute('draggable', true);
                     divPiece.addEventListener('dragstart', dragStart);
                     divPiece.addEventListener('dragend', dragEnd);
-                    divPiece.addEventListener('dragover', dragOver);
                 }
                 divPiece.classList.add(boardType[n]['type'], boardType[n]['color'], 'piece');
                 img.src = boardType[n]['img'];
@@ -262,9 +272,9 @@ function dragOver(event) {
 
 function dragEnd(event) {
     event.preventDefault();
-    for (let i = 0; i < accessiblePos.length; i++) {
-        let element = document.getElementById(accessiblePos[i]);
-        element.classList.remove('accessible');
+    const elements = document.querySelectorAll('.accessible-beige, .accessible-green');
+    for (let i = 0; i < elements.length; i++) {
+        elements[i].classList.remove('accessible-green', 'accessible-beige');
     }
 }
 
@@ -297,7 +307,12 @@ function dragStart(event) {
             if (isMoveLegal(pieceStartPosition, possibleMoves[i], board)) {
                 legalMoves.push(possibleMoves[i]);
                 const element = document.getElementById(possibleMoves[i]);
-                element.classList.add('accessible');
+                if ( element.classList.contains('beige')) {
+                    element.classList.add('accessible-beige');
+                } else {
+                    element.classList.add('accessible-green');
+                }
+                
             }
         }
         accessiblePos = legalMoves;
@@ -333,39 +348,41 @@ function drop(event) {
                         if (isCheckMate(oppositeColor, board)) {
                             gameOver = true;
                             console.log('echec et maths');
+                            break;
                         } else {
-                            if ( countTo50 == 50) {
-                                gameOver = true;
-                                console.log('50 moves rule')
-                            } else {
-                                console.log('echec');
-                            }
+                            console.log('echec');
                         }
                     } else {
                         if (isCheckMate(oppositeColor, board)) {
                             console.log('stalemate');
                             gameOver = true;
+                            break;
                         }
-                        if ( countTo50 == 50) {
-                            gameOver = true;
-                            console.log('50 moves rule')
-                        }
-                        let nb = 1;
-                        if (boardHistory.length !== 0) {
-                            const lastBoard = boardHistory[boardHistory.length - 1];
-                            for (let i = 0; i < boardHistory.length - 1; i++) {
-                                const element = boardHistory[i];
-                                if (isArrayEqual(lastBoard, element)) {
-                                    nb++;
-                                    if (nb === 3) {
-                                        console.log('Threefold Repetition');
-                                        gameOver = true;
-                                        break;
-                                    }
+                    }
+                    let nb = 1;
+                    if (boardHistory.length !== 0) {
+                        const lastBoard = boardHistory[boardHistory.length - 1];
+                        for (let i = 0; i < boardHistory.length - 1; i++) {
+                            const element = boardHistory[i];
+                            if (isArrayEqual(lastBoard, element)) {
+                                nb++;
+                                if (nb === 3) {
+                                    console.log('Threefold Repetition');
+                                    gameOver = true;
+                                    break;
                                 }
                             }
                         }
-                        // ajouter if ici pour autre egalité
+                    }
+                    if ( countTo50 == 50) {
+                        gameOver = true;
+                        console.log('50 moves rule')
+                        break;
+                    }
+                    if (!isCheckMatePossible(board)) {
+                        console.log('Insuffisance matérielle');
+                        gameOver = true;
+                        break;
                     }
                     turn = getOppositeColor(turn);
                     break;
@@ -419,7 +436,7 @@ function movePiece(boardType, endPos, startPos) {
     // supprime la piece si existe et bouge la piece dans le board
     boardType[startingPos] = '';
     boardType[endingPos] = piece;
-    console.log(boardType);
+    // console.log(boardType);
     // supprime la piece si existe et bouge la piece dans le board affiché
     const pieceMoving = document.getElementById(startingPos).querySelector('div');
     const tileSelected = document.getElementById(endingPos);
@@ -446,9 +463,9 @@ function movePiece(boardType, endPos, startPos) {
     const started = getStartedEP(boardType);
     if (piece['type'].includes('pawn') && (piece['color'] == 'white' && endingPos == started - 8 || piece['color'] == 'black' && endingPos == started + 8 )) {
         if ( piece['color'] == 'white') {
-            whiteDeadPieces.push(boardType[started]); 
-        } else {
             blackDeadPieces.push(boardType[started]); 
+        } else {
+            whiteDeadPieces.push(boardType[started]); 
         }
         boardType[started] = '';
         const deadStartedEP = document.getElementById(started);
@@ -460,6 +477,70 @@ function movePiece(boardType, endPos, startPos) {
     if (piece['type'].includes('pawn') && (endingPos == startingPos + 16 || endingPos == startingPos - 16 )) {
         boardType[endingPos]['startedEP'] = true;
     }
+}
+
+function isCheckMatePossible(boardType) {
+    const nbBB = [];
+    const nbWB = [];
+    const nbBN = [];
+    const nbWN = [];
+    const nbBK = [];
+    const nbWK = [];
+    for (let i = 0; i < boardType.length; i++) {
+        if (boardType[i] != '') {
+            if (boardType[i]['type'].includes('pawn')) {
+                return true;
+            }
+            if (boardType[i]['type'].includes('queen')) {
+                return true;
+            }
+            if (boardType[i]['type'].includes('rook')) {
+                return true;
+            }
+            if (boardType[i]['type'].includes('bishop')) {
+                if (boardType[i]['color'] == 'white') {
+                    nbWB.push(i);
+                } else {
+                    nbBB.push(i);
+                }
+            }
+            if (boardType[i]['type'].includes('knight')) {
+                if (boardType[i]['color'] == 'white') {
+                    nbWN.push(i);
+                } else {
+                    nbBN.push(i);
+                }
+            }
+            if (boardType[i]['type'].includes('king')) {
+                if (boardType[i]['color'] == 'white') {
+                    nbWK.push(i);
+                } else {
+                    nbBK.push(i);
+                }
+            }
+        }
+    }
+    if (nbBB.length == 0 && nbBN.length == 0 && nbWB.length == 0 && nbWN.length == 0) {
+        return false;
+    }
+    if ((nbBB.length == 1 && nbBN.length == 0 && nbWB.length == 0 && nbWN.length == 0)||(nbBB.length == 0 && nbBN.length == 0 && nbWB.length == 1 && nbWN.length == 0)) {
+        return false;
+    }
+    if ((nbBB.length == 0 && nbBN.length == 1 && nbWB.length == 0 && nbWN.length == 0)||(nbBB.length == 0 && nbBN.length == 0 && nbWB.length == 0 && nbWN.length == 1)) {
+        return false;
+    }
+    if (nbBB.length == 1 && nbBN.length == 0 && nbWB.length == 1 && nbWN.length == 0) {
+        if (((round(nbBB[0]/8)+nbBB[0]%8)%2 != (round(nbWK[0]/8)+nbWK[0]%8)%2 )||((round(nbWB[0]/8)+nbWB[0]%8)%2 != (round(nbBK[0]/8)+nbBK[0]%8)%2)) {
+            return false;
+        }
+    }
+    return true;
+}
+// arrondi a l'entier le plus petit
+function round(x) {
+    const nb = parseFloat(x).toString();
+    const res = parseInt(nb[0]);
+    return res;
 }
 
 function createTurn(boardType, endPos, startPos) {
@@ -1024,7 +1105,6 @@ function isCheck(color, boardType) {
 
 function isCheckMate(color, boardType) {
     const colorAccessiblePos = [];
-    // parcours le board copy
     for (let i = 0; i < boardType.length; i++) {
         if (boardType[i] != '' && boardType[i]['color'] == color) {
             if (boardType[i]['type'].includes('pawn')) {
@@ -1077,7 +1157,6 @@ function isCheckMate(color, boardType) {
             }
         }
     }
-    // console.log(colorAccessiblePos);
     if (colorAccessiblePos.length == 0) {
         return true;
     } else {
@@ -1090,7 +1169,6 @@ function isCheckMate(color, boardType) {
 - egalite : 
     - Dead Position // impossible
     - Threefold Repetition // maybe a modifier
-    - nombre de piece insufisant // peut etre dur
 - systeme de gameOver :
     - affichage de fin
 - promotion : 

@@ -145,8 +145,12 @@ body {
     width: 20px;
 }
 
-.accessible {
+.accessible-beige {
     box-shadow: inset 0px 0px 0px 5px lightgray;
+}
+
+.accessible-green {
+    box-shadow: inset 0px 0px 0px 1px rgb(195, 204, 187), inset 0px 0px 0px 5px lightgray;
 }
 
 .player-name-black {
