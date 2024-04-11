@@ -146,7 +146,7 @@ body {
 }
 
 .accessible-beige {
-    box-shadow: inset 0px 0px 0px 5px lightgray;
+    box-shadow: inset 0px 0px 0px 1px rgb(188, 190, 145), inset 0px 0px 0px 5px lightgray;
 }
 
 .accessible-green {

@@ -62,17 +62,6 @@ const defaultBoard = [
     { ...wRLeft }, { ...wN }, { ...wB }, { ...wQ }, { ...wK }, { ...wB }, { ...wN }, { ...wRRight },
 ];
 /*
-// test echec et maths
-const defaultBoard = [
-    { ...bRLeft }, '', '', '', '', { ...bRRight }, { ...bK }, '',
-    { ...bP }, { ...bP }, { ...bP }, '', '', { ...bP }, '', { ...bP },
-    '', '', '', '', '', { ...wB }, { ...bP }, '',
-    '', '', '', '', '', '', '', '',
-    '', '', '', '', '', '', { ...wN }, '',
-    '', { ...wP }, '', '', '', '', '', '',
-    { ...wP }, '', '', '', '', { ...wP }, { ...wP }, { ...wP },
-    '', '', '', '', '', { ...wRRight }, { ...wK }, '',
-];
 // test materiel insuffisant
 const defaultBoard = [
     { ...bK}, '', '', '', '', '', '', '',
@@ -286,22 +275,22 @@ function dragStart(event) {
         let possibleMoves = [];
         let legalMoves = [];
         if (pieceType.includes('pawn')) {
-            possibleMoves = possibleMoves.concat(pawnMoves(pieceStartPosition, pieceColor, board));
+            possibleMoves = pawnMoves(pieceStartPosition, pieceColor, board);
         }
         if (pieceType.includes('knight')) {
-            possibleMoves = possibleMoves.concat(knightMoves(pieceStartPosition, pieceColor, board));
+            possibleMoves = knightMoves(pieceStartPosition, pieceColor, board);
         }
         if (pieceType.includes('bishop')) {
-            possibleMoves = possibleMoves.concat(bishopMoves(pieceStartPosition, pieceColor, board));
+            possibleMoves = bishopMoves(pieceStartPosition, pieceColor, board);
         }
         if (pieceType.includes('rook')) {
-            possibleMoves = possibleMoves.concat(rookMoves(pieceStartPosition, pieceColor, board));
+            possibleMoves = rookMoves(pieceStartPosition, pieceColor, board);
         }
         if (pieceType.includes('queen')) {
-            possibleMoves = possibleMoves.concat(bishopMoves(pieceStartPosition, pieceColor, board), rookMoves(pieceStartPosition, pieceColor, board) );
+            possibleMoves = possibleMoves.concat(bishopMoves(pieceStartPosition, pieceColor, board), rookMoves(pieceStartPosition, pieceColor, board));
         }
         if (pieceType.includes('king')) {
-            possibleMoves = possibleMoves.concat(kingMoves(pieceStartPosition, pieceColor, board));
+            possibleMoves = kingMoves(pieceStartPosition, pieceColor, board);
         }
         for (let i = 0; i < possibleMoves.length; i++) {
             if (isMoveLegal(pieceStartPosition, possibleMoves[i], board)) {
@@ -1167,8 +1156,7 @@ function isCheckMate(color, boardType) {
 - historique :
     - uniquement le a au lieu de a1 mais bon
 - egalite : 
-    - Dead Position // impossible
-    - Threefold Repetition // maybe a modifier
+    - Threefold Repetition // a modifier
 - systeme de gameOver :
     - affichage de fin
 - promotion : 
@@ -1176,7 +1164,6 @@ function isCheckMate(color, boardType) {
 - bouton nouvelle game et bouton ff
 EGALITE :
 - Stalemate / fait
-- Dead Position / a faire
 - Mutual Agreement / a faire - facile
 - Threefold Repetition / a faire
 - 50-Move Rule / fait
